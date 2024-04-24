@@ -18,6 +18,10 @@ configurations {
 	}
 }
 
+flyway {
+	url = "jdbc:postgresql://localhost:5432/adpro?user=postgres&password=raviehasan"
+}
+
 repositories {
 	mavenCentral()
 }
@@ -43,11 +47,6 @@ buildscript {
 		classpath("org.flywaydb:flyway-database-postgresql:10.11.0")
 	}
 }
-
-flyway {
-	url = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432/Adpro?user=postgres&password=P1sangkep0k"
-}
-
 
 tasks.withType<Test> {
 	useJUnitPlatform()
