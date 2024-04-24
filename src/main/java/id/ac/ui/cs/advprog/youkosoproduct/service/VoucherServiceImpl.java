@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.youkosoproduct.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,27 +17,37 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public Voucher create(Voucher voucher) {
-        return null;
+        return voucherRepository.save(voucher);
     }
 
     @Override
     public void delete(String voucherId) {
-        return;
+        voucherRepository.deleteById(voucherId);
     }
 
     @Override
     public List<Voucher> findAll() {
-        return null;
+        return voucherRepository.findAll();
     }
 
     @Override
     public Voucher findVoucherById(String voucherId) {
-        return null;
+        return voucherRepository.findById(voucherId).orElse(null);
     }
 
     @Override
-    public void edit(String voucherId, String voucherName, double voucherDiscountAmount, int voucherMaxUsage) {
-        return;
+    public void edit(String voucherId, String voucherName,
+            double voucherDiscountAmount, int voucherMaxUsage) {
+        Optional<Voucher> optionalVoucher = voucherRepository.findById(voucherId);
+        if (optionalVoucher.isPresent()) {
+            Voucher voucher = optionalVoucher.get();
+            voucher.setName(voucherName);
+            voucher.setDiscountAmount(voucherDiscountAmount);
+            voucher.setMaxUsage(voucherMaxUsage);
+            voucherRepository.save(voucher);
+        } else {
+            throw new IllegalArgumentException("There is no voucher with ID " + voucherId);
+        }
     }
 
 }
