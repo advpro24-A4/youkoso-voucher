@@ -1,36 +1,24 @@
 package id.ac.ui.cs.advprog.youkosoproduct.model;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "voucher")
 public class Voucher {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "discountAmount", nullable = false)
     private double discountAmount;
+
+    @Column(name = "maxUsage", nullable = false)
     private int maxUsage;
-
-    public String getId() {
-        return null;
-    }
-
-    public String getName() {
-        return null;
-    }
-
-    public double getDiscountAmount() {
-        return 0;
-    }
-
-    public int getMaxUsage() {
-        return 0;
-    }
-
-    public void setId(String id) {
-    }
-
-    public void setName(String name) {
-    }
-
-    public void setDiscountAmount(double discountAmount) {
-    }
-
-    public void setMaxUsage(int maxUsage) {
-    }
 }
