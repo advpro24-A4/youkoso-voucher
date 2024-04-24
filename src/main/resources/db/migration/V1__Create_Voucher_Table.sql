@@ -1,0 +1,6 @@
+CREATE TABLE voucher (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    discountAmount DOUBLE PRECISION NOT NULL,
+    maxUsage INTEGER NOT NULL
+);
