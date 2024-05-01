@@ -16,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,10 +33,13 @@ public class VoucherServiceImplTest {
     @BeforeEach
     void setUp() {
         this.voucher = new Voucher();
-        this.voucher.setId("5a5c06a3-4827-44fa-b8bf-cdc117f5e731");
+        this.voucher.setId(100L);
         this.voucher.setName("Discount 50%");
-        this.voucher.setDiscountAmount(0.5);
-        this.voucher.setMaxUsage(Integer.MAX_VALUE);
+        this.voucher.setDiscountPercentage(0.5);
+        this.voucher.setHasUsageLimit(true);
+        this.voucher.setUsageLimit(100);
+        this.voucher.setMinimumOrder(50000);
+        this.voucher.setMaximumDiscountAmount(25000);
     }
 
     void testCreateVoucher() {
@@ -49,8 +53,10 @@ public class VoucherServiceImplTest {
 
     @Test
     void testDeleteVoucher() {
-        String voucherId = "5a5c06a3-4827-44fa-b8bf-cdc117f5e731";
+        Long voucherId = 100L;
+
         service.delete(voucherId);
+
         verify(voucherRepository, times(1)).deleteById(voucherId);
     }
 
@@ -60,7 +66,6 @@ public class VoucherServiceImplTest {
         expectedList.add(voucher);
 
         when(voucherRepository.findAll()).thenReturn(expectedList);
-
         List<Voucher> actualList = service.findAll();
 
         assertEquals(expectedList, actualList);
@@ -69,9 +74,9 @@ public class VoucherServiceImplTest {
 
     @Test
     void testFindVoucherById() {
-        String voucherId = "5a5c06a3-4827-44fa-b8bf-cdc117f5e731";
-        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
+        Long voucherId = 100L;
 
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
         Voucher foundVoucher = service.findVoucherById(voucherId);
 
         assertEquals(voucher, foundVoucher);
@@ -79,8 +84,9 @@ public class VoucherServiceImplTest {
     }
 
     @Test
-    void testFindVoucherByIdNotFound() {
-        String voucherId = "0a5c06a3-4827-44fa-b8bf-cdc117f5e731";
+    void testFindVoucherByIdIfNotFound() {
+        Long voucherId = 200L;
+
         when(voucherRepository.findById(voucherId)).thenReturn(Optional.empty());
 
         assertNull(service.findVoucherById(voucherId));
@@ -89,31 +95,72 @@ public class VoucherServiceImplTest {
 
     @Test
     void testEditVoucher() {
-        when(voucherRepository.findById("5a5c06a3-4827-44fa-b8bf-cdc117f5e731"))
+        when(voucherRepository.findById(100L))
                 .thenReturn(Optional.of(voucher));
 
         String editedName = "Edited Voucher";
-        double editedDiscountAmount = 0.7;
-        int editedMaxUsage = 20;
+        double editedDiscountPercentage = 0.3;
+        boolean editedHasUsageLimit = true;
+        int editedUsageLimit = 30;
+        int editedMinimumOrder = 300000;
+        int editedMaximumDiscountAmount = 30000;
 
-        service.edit("5a5c06a3-4827-44fa-b8bf-cdc117f5e731", editedName,
-                editedDiscountAmount, editedMaxUsage);
+        service.edit(100L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+                editedUsageLimit, editedMinimumOrder, editedMaximumDiscountAmount);
 
         assertEquals(editedName, voucher.getName());
-        assertEquals(editedDiscountAmount, voucher.getDiscountAmount());
-        assertEquals(editedMaxUsage, voucher.getMaxUsage());
+        assertEquals(editedDiscountPercentage, voucher.getDiscountPercentage());
+        assertEquals(editedHasUsageLimit, voucher.getHasUsageLimit());
+        assertEquals(editedUsageLimit, voucher.getUsageLimit());
+        assertEquals(editedMinimumOrder, voucher.getMinimumOrder());
+        assertEquals(editedMaximumDiscountAmount, voucher.getMaximumDiscountAmount());
+
+        verify(voucherRepository, times(1)).save(voucher);
+    }
+
+    @Test
+    void testEditVoucherWithDefaultAttributesShouldRemainsUnchanged() {
+        when(voucherRepository.findById(100L))
+                .thenReturn(Optional.of(voucher));
+
+        Voucher voucherWithDefault = new Voucher();
+        voucherWithDefault.setName("Discount 50%");
+        voucherWithDefault.setDiscountPercentage(0.5);
+        voucherWithDefault.setHasUsageLimit(false);
+
+        String editedName = "Edited Voucher";
+        double editedDiscountPercentage = 0.3;
+        boolean editedHasUsageLimit = true;
+
+        service.edit(100L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+                voucherWithDefault.getUsageLimit(), voucherWithDefault.getMinimumOrder(),
+                voucherWithDefault.getMaximumDiscountAmount());
+
+        assertEquals(editedName, voucher.getName());
+        assertEquals(editedDiscountPercentage, voucher.getDiscountPercentage());
+        assertEquals(editedHasUsageLimit, voucher.getHasUsageLimit());
+        assertEquals(Integer.MAX_VALUE, voucher.getUsageLimit());
+        assertEquals(0.0, voucher.getMinimumOrder());
+        assertEquals(Integer.MAX_VALUE, voucher.getMaximumDiscountAmount());
 
         verify(voucherRepository, times(1)).save(voucher);
     }
 
     @Test
     void testEditVoucherNotFound() {
-        when(voucherRepository.findById("5a5c06a3-4827-44fa-b8bf-cdc117f5e731"))
+        when(voucherRepository.findById(100L))
                 .thenReturn(Optional.empty());
 
+        String editedName = "Edited Voucher";
+        double editedDiscountPercentage = 0.3;
+        boolean editedHasUsageLimit = true;
+        int editedUsageLimit = 30;
+        int editedMinimumOrder = 300000;
+        int editedMaximumDiscountAmount = 30000;
+
         assertThrows(IllegalArgumentException.class, () -> {
-            service.edit("5a5c06a3-4827-44fa-b8bf-cdc117f5e731",
-                    "Edited Voucher", 0.7, 20);
+            service.edit(100L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+                    editedUsageLimit, editedMinimumOrder, editedMaximumDiscountAmount);
         });
 
         verify(voucherRepository, never()).save(any());
