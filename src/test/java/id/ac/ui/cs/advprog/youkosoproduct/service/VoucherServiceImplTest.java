@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.youkosoproduct.service;
 
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
 import id.ac.ui.cs.advprog.youkosoproduct.repository.VoucherRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,14 +33,15 @@ public class VoucherServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        this.voucher = new Voucher();
-        this.voucher.setId(100L);
-        this.voucher.setName("Discount 50%");
-        this.voucher.setDiscountPercentage(0.5);
-        this.voucher.setHasUsageLimit(true);
-        this.voucher.setUsageLimit(100);
-        this.voucher.setMinimumOrder(50000);
-        this.voucher.setMaximumDiscountAmount(25000);
+        this.voucher = new VoucherBuilder()
+                .name("Discount 50%")
+                .discountPercentage(0.5)
+                .hasUsageLimit(true)
+                .usageLimit(100)
+                .minimumOrder(50000)
+                .maximumDiscountAmount(25000)
+                .build();
+        this.voucher.setId(1L);
     }
 
     void testCreateVoucher() {
@@ -53,7 +55,7 @@ public class VoucherServiceImplTest {
 
     @Test
     void testDeleteVoucher() {
-        Long voucherId = 100L;
+        long voucherId = 1L;
 
         service.delete(voucherId);
 
@@ -74,7 +76,7 @@ public class VoucherServiceImplTest {
 
     @Test
     void testFindVoucherById() {
-        Long voucherId = 100L;
+        long voucherId = 1L;
 
         when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
         Voucher foundVoucher = service.findVoucherById(voucherId);
@@ -85,7 +87,7 @@ public class VoucherServiceImplTest {
 
     @Test
     void testFindVoucherByIdIfNotFound() {
-        Long voucherId = 200L;
+        long voucherId = -1L;
 
         when(voucherRepository.findById(voucherId)).thenReturn(Optional.empty());
 
@@ -95,7 +97,7 @@ public class VoucherServiceImplTest {
 
     @Test
     void testEditVoucher() {
-        when(voucherRepository.findById(100L))
+        when(voucherRepository.findById(1L))
                 .thenReturn(Optional.of(voucher));
 
         String editedName = "Edited Voucher";
@@ -105,7 +107,7 @@ public class VoucherServiceImplTest {
         int editedMinimumOrder = 300000;
         int editedMaximumDiscountAmount = 30000;
 
-        service.edit(100L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+        service.edit(1L, editedName, editedDiscountPercentage, editedHasUsageLimit,
                 editedUsageLimit, editedMinimumOrder, editedMaximumDiscountAmount);
 
         assertEquals(editedName, voucher.getName());
@@ -120,19 +122,20 @@ public class VoucherServiceImplTest {
 
     @Test
     void testEditVoucherWithDefaultAttributesShouldRemainsUnchanged() {
-        when(voucherRepository.findById(100L))
+        when(voucherRepository.findById(1L))
                 .thenReturn(Optional.of(voucher));
 
-        Voucher voucherWithDefault = new Voucher();
-        voucherWithDefault.setName("Discount 50%");
-        voucherWithDefault.setDiscountPercentage(0.5);
-        voucherWithDefault.setHasUsageLimit(false);
+        Voucher voucherWithDefault = new VoucherBuilder()
+                .name("Discount 50%")
+                .discountPercentage(0.5)
+                .hasUsageLimit(false)
+                .build();
 
         String editedName = "Edited Voucher";
         double editedDiscountPercentage = 0.3;
         boolean editedHasUsageLimit = true;
 
-        service.edit(100L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+        service.edit(1L, editedName, editedDiscountPercentage, editedHasUsageLimit,
                 voucherWithDefault.getUsageLimit(), voucherWithDefault.getMinimumOrder(),
                 voucherWithDefault.getMaximumDiscountAmount());
 
@@ -148,7 +151,7 @@ public class VoucherServiceImplTest {
 
     @Test
     void testEditVoucherNotFound() {
-        when(voucherRepository.findById(100L))
+        when(voucherRepository.findById(-1L))
                 .thenReturn(Optional.empty());
 
         String editedName = "Edited Voucher";
@@ -159,7 +162,7 @@ public class VoucherServiceImplTest {
         int editedMaximumDiscountAmount = 30000;
 
         assertThrows(IllegalArgumentException.class, () -> {
-            service.edit(100L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+            service.edit(-1L, editedName, editedDiscountPercentage, editedHasUsageLimit,
                     editedUsageLimit, editedMinimumOrder, editedMaximumDiscountAmount);
         });
 
