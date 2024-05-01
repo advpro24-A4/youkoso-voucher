@@ -7,35 +7,68 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VoucherTest {
-    Voucher voucher;
+    private Voucher voucher;
 
     @BeforeEach
     void setUp() {
         this.voucher = new Voucher();
-        this.voucher.setId("5a5c06a3-4827-44fa-b8bf-cdc117f5e731");
+    }
+
+    @Test
+    void testSetAndSetAndGetVoucherId() {
+        this.voucher.setId(100L);
+        assertEquals(100L, this.voucher.getId());
+    }
+
+    @Test
+    void testSetAndGetVoucherName() {
         this.voucher.setName("Discount 50%");
-        this.voucher.setDiscountAmount(0.5);
-        this.voucher.setMaxUsage(Integer.MAX_VALUE);
-    }
-
-    @Test
-    void testGetVoucherId() {
-        assertEquals("5a5c06a3-4827-44fa-b8bf-cdc117f5e731", this.voucher.getId());
-    }
-
-    @Test
-    void testGetVoucherName() {
         assertEquals("Discount 50%", this.voucher.getName());
     }
 
     @Test
-    void testGetVoucherDiscountAmount() {
-        assertEquals(0.5, this.voucher.getDiscountAmount());
+    void testSetAndGetVoucherDiscountPercentage() {
+        this.voucher.setDiscountPercentage(0.5);
+        assertEquals(0.5, this.voucher.getDiscountPercentage());
     }
 
     @Test
-    void testGetVoucherMaxUsage() {
-        assertEquals(Integer.MAX_VALUE, this.voucher.getMaxUsage());
+    void testSetAndGetHasUsageLimit() {
+        this.voucher.setHasUsageLimit(true);
+        assertEquals(true, this.voucher.getHasUsageLimit());
+    }
+
+    @Test
+    void testSetAndGetUsageLimit() {
+        this.voucher.setUsageLimit(100);
+        assertEquals(100, this.voucher.getUsageLimit());
+    }
+
+    @Test
+    void testSetAndGetMinimumOrder() {
+        this.voucher.setMinimumOrder(50000);
+        assertEquals(50000, this.voucher.getMinimumOrder());
+    }
+
+    @Test
+    void testSetAndGetMaximumDiscountAmount() {
+        this.voucher.setMaximumDiscountAmount(25000);
+        assertEquals(25000, this.voucher.getMaximumDiscountAmount());
+    }
+
+    @Test
+    void testGetUsageLimitIfDefault() {
+        assertEquals(Integer.MAX_VALUE, this.voucher.getUsageLimit());
+    }
+
+    @Test
+    void testSetAndGetMinimumOrderIfDefault() {
+        assertEquals(0.0, this.voucher.getMinimumOrder());
+    }
+
+    @Test
+    void testSetAndGetMaximumDiscountAmountIfDefault() {
+        assertEquals(Integer.MAX_VALUE, this.voucher.getMaximumDiscountAmount());
     }
 
     @AfterEach
