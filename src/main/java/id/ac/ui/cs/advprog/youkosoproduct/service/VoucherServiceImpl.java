@@ -36,7 +36,7 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public void edit(long id, String name, double discountPercentage, boolean hasUsageLimit,
+    public void edit(Long id, String name, double discountPercentage, boolean hasUsageLimit,
             int usageLimit, double minimumOrder, int maximumDiscountAmount) {
         Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
         if (optionalVoucher.isPresent()) {
@@ -52,5 +52,5 @@ public class VoucherServiceImpl implements VoucherService {
             throw new IllegalArgumentException("There is no voucher with ID " + id);
         }
     }
-
+    
 }
