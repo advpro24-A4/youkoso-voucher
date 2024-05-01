@@ -1,109 +1,179 @@
 package id.ac.ui.cs.advprog.youkosoproduct.repository;
 
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VoucherRepositoryTest {
-    
-    @InjectMocks
+
+    @Mock
     private VoucherRepository voucherRepository;
 
+    private Voucher voucher;
+
+    @BeforeEach
+    void setUp() {
+        this.voucher = new Voucher();
+        this.voucher.setId(100L);
+        this.voucher.setName("Discount 50%");
+        this.voucher.setDiscountPercentage(0.5);
+        this.voucher.setHasUsageLimit(true);
+        this.voucher.setUsageLimit(100);
+        this.voucher.setMinimumOrder(50000);
+        this.voucher.setMaximumDiscountAmount(25000);
+    }
+
     @Test
-    void testSaveAndFind() {
-        Voucher voucher = new Voucher();
-        voucher.setId("5a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher.setName("Discount 50%");
-        voucher.setDiscountAmount(0.5);
-        voucher.setMaxUsage(Integer.MAX_VALUE);
+    void testSaveWithFindAll() {
+        when(voucherRepository.save(voucher)).thenReturn(voucher);
+
+        List<Voucher> voucherList = new ArrayList<>();
+        voucherList.add(voucher);
+        when(voucherRepository.findAll()).thenReturn(voucherList);
+
         voucherRepository.save(voucher);
+        List<Voucher> savedVoucherList = voucherRepository.findAll();
 
-        List<Voucher> voucherList = voucherRepository.findAll();
-        assertFalse(voucherList.isEmpty());
+        assertEquals(1, savedVoucherList.size());
+        assertEquals(voucher, savedVoucherList.getFirst());
+    }
 
-        Voucher savedVoucher = voucherList.get(0);
+    @Test
+    void testSavedVoucherEntityWithFindById() {
+        when(voucherRepository.save(voucher)).thenReturn(voucher);
+
+        List<Voucher> voucherList = new ArrayList<>();
+        voucherList.add(voucher);
+        when(voucherRepository.findAll()).thenReturn(voucherList);
+
+        voucherRepository.save(voucher);
+        Voucher savedVoucher = voucherRepository.findAll().getFirst();
+
+        assertEquals(voucher, savedVoucher);
+    }
+
+    @Test
+    void testSavedVoucherAttributesWithFindById() {
+        when(voucherRepository.save(voucher)).thenReturn(voucher);
+
+        List<Voucher> voucherList = new ArrayList<>();
+        voucherList.add(voucher);
+        when(voucherRepository.findAll()).thenReturn(voucherList);
+
+        voucherRepository.save(voucher);
+        Voucher savedVoucher = voucherRepository.findAll().getFirst();
+
         assertEquals(voucher.getId(), savedVoucher.getId());
         assertEquals(voucher.getName(), savedVoucher.getName());
-        assertEquals(voucher.getDiscountAmount(), savedVoucher.getDiscountAmount());
-        assertEquals(voucher.getMaxUsage(), savedVoucher.getMaxUsage());
+        assertEquals(voucher.getDiscountPercentage(), savedVoucher.getDiscountPercentage());
+        assertEquals(voucher.getUsageLimit(), savedVoucher.getUsageLimit());
+        assertEquals(voucher.getMinimumOrder(), savedVoucher.getMinimumOrder());
+        assertEquals(voucher.getMaximumDiscountAmount(), savedVoucher.getMaximumDiscountAmount());
     }
 
     @Test
     void testFindUnavailableVoucher() {
-        Voucher voucher1 = new Voucher();
-        voucher1.setId("5a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher1.setName("Discount 50%");
-        voucher1.setDiscountAmount(0.5);
-        voucher1.setMaxUsage(Integer.MAX_VALUE);
-        voucherRepository.save(voucher1);
+        when(voucherRepository.findById(anyLong())).thenReturn(Optional.empty());
+        Optional<Voucher> obtainedVoucher = voucherRepository.findById(200L);
 
-        Voucher voucher2 = new Voucher();
-        voucher2.setId("4a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher2.setName("Discount 40%");
-        voucher2.setDiscountAmount(0.4);
-        voucher2.setMaxUsage(Integer.MAX_VALUE);
-        voucherRepository.save(voucher2);
-
-        Optional<Voucher> obtainedVoucher = voucherRepository.findById("z0f9de46-90b1-437d-a0bf-d0821dde9096");
-        assertNull(obtainedVoucher.orElse(null));
+        assertFalse(obtainedVoucher.isPresent());
     }
 
     @Test
     void testFindAllIfEmpty() {
+        when(voucherRepository.findAll()).thenReturn(new ArrayList<>());
         List<Voucher> voucherList = voucherRepository.findAll();
+
         assertTrue(voucherList.isEmpty());
     }
 
     @Test
     void testFindAllIfMoreThanOneVoucher() {
-        Voucher voucher1 = new Voucher();
-        voucher1.setId("5a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher1.setName("Discount 50%");
-        voucher1.setDiscountAmount(0.5);
-        voucher1.setMaxUsage(Integer.MAX_VALUE);
-        voucherRepository.save(voucher1);
-
+        List<Voucher> voucherList = new ArrayList<>();
+        voucherList.add(voucher);
         Voucher voucher2 = new Voucher();
-        voucher2.setId("4a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher2.setName("Discount 40%");
-        voucher2.setDiscountAmount(0.4);
-        voucher2.setMaxUsage(Integer.MAX_VALUE);
-        voucherRepository.save(voucher2);
-
+        voucherList.add(voucher2);
         Voucher voucher3 = new Voucher();
-        voucher3.setId("3a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher3.setName("Discount 30%");
-        voucher3.setDiscountAmount(0.3);
-        voucher3.setMaxUsage(Integer.MAX_VALUE);
-        voucherRepository.save(voucher3);
+        voucherList.add(voucher3);
 
-        List<Voucher> voucherList = voucherRepository.findAll();
-        assertEquals(3, voucherList.size());
+        when(voucherRepository.findAll()).thenReturn(voucherList);
+        List<Voucher> savedVouchers = voucherRepository.findAll();
+
+        assertEquals(3, savedVouchers.size());
     }
 
     @Test
-    void testDeleteVoucher() {
-        Voucher voucher = new Voucher();
-        voucher.setId("5a5c06a3-4827-44fa-b8bf-cdc117f5e731");
-        voucher.setName("Discount 50%");
-        voucher.setDiscountAmount(0.5);
-        voucher.setMaxUsage(Integer.MAX_VALUE);
-        voucherRepository.save(voucher);
+    void testFindAllElementsIfMoreThanOneVoucher() {
+        List<Voucher> voucherList = new ArrayList<>();
+        voucherList.add(voucher);
+        Voucher voucher2 = new Voucher();
+        voucherList.add(voucher2);
+        Voucher voucher3 = new Voucher();
+        voucherList.add(voucher3);
 
-        voucherRepository.save(voucher);
+        when(voucherRepository.findAll()).thenReturn(voucherList);
+        List<Voucher> savedVouchers = voucherRepository.findAll();
+
+        assertEquals(voucher, savedVouchers.get(0));
+        assertEquals(voucher2, savedVouchers.get(1));
+        assertEquals(voucher3, savedVouchers.get(2));
+    }
+
+    @Test
+    void testDeleteVoucherWithFindById() {
+        doNothing().when(voucherRepository).deleteById(anyLong());
+        voucherRepository.deleteById(voucher.getId());
+        
+        when(voucherRepository.findById(anyLong())).thenReturn(Optional.empty());
+        Optional<Voucher> searchDeletedVoucher = voucherRepository.findById(voucher.getId());
+
+        assertFalse(searchDeletedVoucher.isPresent());
+    }
+
+    @Test
+    void testDeleteVoucherWithFindAll() {
+        doNothing().when(voucherRepository).deleteById(anyLong());
         voucherRepository.deleteById(voucher.getId());
 
-        Optional<Voucher> searchDeletedVoucher = voucherRepository.findById(voucher.getId());
-        assertFalse(searchDeletedVoucher.isPresent());
+        List<Voucher> savedVouchers = voucherRepository.findAll();
+
+        assertTrue(savedVouchers.isEmpty());
+    }
+
+    @Test
+    void testDeleteAllVoucherWithFindAll() {
+        List<Voucher> voucherList = new ArrayList<>();
+        voucherList.add(voucher);
+        Voucher voucher2 = new Voucher();
+        voucherList.add(voucher2);
+        Voucher voucher3 = new Voucher();
+        voucherList.add(voucher3);
+
+        doNothing().when(voucherRepository).deleteAll();
+        voucherRepository.deleteAll();
+
+        List<Voucher> savedVouchers = voucherRepository.findAll();
+
+        assertTrue(savedVouchers.isEmpty());
+    }
+
+    @AfterEach
+    void tearDown() {
+        this.voucher = null;
+        voucherRepository.deleteAll();
     }
 }
