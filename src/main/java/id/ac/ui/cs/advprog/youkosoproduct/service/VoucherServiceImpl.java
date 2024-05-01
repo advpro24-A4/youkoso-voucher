@@ -21,7 +21,7 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public void delete(String voucherId) {
+    public void delete(Long voucherId) {
         voucherRepository.deleteById(voucherId);
     }
 
@@ -31,22 +31,25 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public Voucher findVoucherById(String voucherId) {
+    public Voucher findVoucherById(Long voucherId) {
         return voucherRepository.findById(voucherId).orElse(null);
     }
 
     @Override
-    public void edit(String voucherId, String voucherName,
-            double voucherDiscountAmount, int voucherMaxUsage) {
-        Optional<Voucher> optionalVoucher = voucherRepository.findById(voucherId);
+    public void edit(Long id, String name, double discountPercentage, boolean hasUsageLimit,
+            int usageLimit, double minimumOrder, int maximumDiscountAmount) {
+        Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
         if (optionalVoucher.isPresent()) {
             Voucher voucher = optionalVoucher.get();
-            voucher.setName(voucherName);
-            voucher.setDiscountAmount(voucherDiscountAmount);
-            voucher.setMaxUsage(voucherMaxUsage);
+            voucher.setName(name);
+            voucher.setDiscountPercentage(discountPercentage);
+            voucher.setHasUsageLimit(hasUsageLimit);
+            voucher.setUsageLimit(usageLimit);
+            voucher.setMinimumOrder(minimumOrder);
+            voucher.setMaximumDiscountAmount(maximumDiscountAmount);
             voucherRepository.save(voucher);
         } else {
-            throw new IllegalArgumentException("There is no voucher with ID " + voucherId);
+            throw new IllegalArgumentException("There is no voucher with ID " + id);
         }
     }
 

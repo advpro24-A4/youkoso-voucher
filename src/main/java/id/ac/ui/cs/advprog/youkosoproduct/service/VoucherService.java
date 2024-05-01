@@ -7,11 +7,12 @@ import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
 public interface VoucherService {
     Voucher create(Voucher voucher);
 
-    void delete(String voucherId);
+    void delete(Long id);
 
     List<Voucher> findAll();
 
-    Voucher findVoucherById(String voucherId);
+    Voucher findVoucherById(Long id);
 
-    void edit(String voucherId, String voucherName, double voucherDiscountAmount, int voucherMaxUsage);
+    void edit(Long id, String name, double discountPercentage, boolean hasUsageLimit,
+            int usageLimit, double minimumOrder, int maximumDiscountAmount);
 }
