@@ -13,6 +13,6 @@ public interface VoucherService {
 
     Voucher findVoucherById(Long id);
 
-    void edit(Long id, String name, double discountPercentage, boolean hasUsageLimit,
+    void edit(long id, String name, double discountPercentage, boolean hasUsageLimit,
             int usageLimit, double minimumOrder, int maximumDiscountAmount);
 }
