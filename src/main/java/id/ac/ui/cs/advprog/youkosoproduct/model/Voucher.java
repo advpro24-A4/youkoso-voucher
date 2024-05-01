@@ -11,14 +11,24 @@ import lombok.Setter;
 public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    @Column(name = "id", nullable = false, unique = true)
+    private long id;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "discountAmount", nullable = false)
-    private double discountAmount;
+    @Column(name = "discountPercentage", nullable = false)
+    private double discountPercentage;
 
-    @Column(name = "maxUsage", nullable = false)
-    private int maxUsage;
+    @Column(name = "hasUsageLimit", nullable = false)
+    private Boolean hasUsageLimit;
+
+    @Column(name = "usageLimit", columnDefinition = "integer default 2147483647")
+    private int usageLimit = Integer.MAX_VALUE;
+
+    @Column(name = "minimumOrder", columnDefinition = "double default 0.0")
+    private double minimumOrder = 0.0;
+
+    @Column(name = "maximumDiscountAmount", columnDefinition = "integer default 2147483647")
+    private int maximumDiscountAmount = Integer.MAX_VALUE;
 }
