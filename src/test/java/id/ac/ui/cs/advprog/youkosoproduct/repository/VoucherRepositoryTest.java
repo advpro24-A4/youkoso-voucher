@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.youkosoproduct.repository;
 
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,14 +28,14 @@ class VoucherRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        this.voucher = new Voucher();
-        this.voucher.setId(100L);
-        this.voucher.setName("Discount 50%");
-        this.voucher.setDiscountPercentage(0.5);
-        this.voucher.setHasUsageLimit(true);
-        this.voucher.setUsageLimit(100);
-        this.voucher.setMinimumOrder(50000);
-        this.voucher.setMaximumDiscountAmount(25000);
+        this.voucher = new VoucherBuilder()
+                .name("Discount 50%")
+                .discountPercentage(0.5)
+                .hasUsageLimit(true)
+                .usageLimit(100)
+                .minimumOrder(50000)
+                .maximumDiscountAmount(25000)
+                .build();
     }
 
     @Test
@@ -88,7 +89,7 @@ class VoucherRepositoryTest {
     @Test
     void testFindUnavailableVoucher() {
         when(voucherRepository.findById(anyLong())).thenReturn(Optional.empty());
-        Optional<Voucher> obtainedVoucher = voucherRepository.findById(200L);
+        Optional<Voucher> obtainedVoucher = voucherRepository.findById(-1L);
 
         assertFalse(obtainedVoucher.isPresent());
     }
@@ -105,9 +106,9 @@ class VoucherRepositoryTest {
     void testFindAllIfMoreThanOneVoucher() {
         List<Voucher> voucherList = new ArrayList<>();
         voucherList.add(voucher);
-        Voucher voucher2 = new Voucher();
+        Voucher voucher2 = new VoucherBuilder().build();
         voucherList.add(voucher2);
-        Voucher voucher3 = new Voucher();
+        Voucher voucher3 = new VoucherBuilder().build();
         voucherList.add(voucher3);
 
         when(voucherRepository.findAll()).thenReturn(voucherList);
@@ -120,9 +121,9 @@ class VoucherRepositoryTest {
     void testFindAllElementsIfMoreThanOneVoucher() {
         List<Voucher> voucherList = new ArrayList<>();
         voucherList.add(voucher);
-        Voucher voucher2 = new Voucher();
+        Voucher voucher2 = new VoucherBuilder().build();
         voucherList.add(voucher2);
-        Voucher voucher3 = new Voucher();
+        Voucher voucher3 = new VoucherBuilder().build();
         voucherList.add(voucher3);
 
         when(voucherRepository.findAll()).thenReturn(voucherList);
@@ -137,7 +138,7 @@ class VoucherRepositoryTest {
     void testDeleteVoucherWithFindById() {
         doNothing().when(voucherRepository).deleteById(anyLong());
         voucherRepository.deleteById(voucher.getId());
-        
+
         when(voucherRepository.findById(anyLong())).thenReturn(Optional.empty());
         Optional<Voucher> searchDeletedVoucher = voucherRepository.findById(voucher.getId());
 
@@ -158,9 +159,9 @@ class VoucherRepositoryTest {
     void testDeleteAllVoucherWithFindAll() {
         List<Voucher> voucherList = new ArrayList<>();
         voucherList.add(voucher);
-        Voucher voucher2 = new Voucher();
+        Voucher voucher2 = new VoucherBuilder().build();
         voucherList.add(voucher2);
-        Voucher voucher3 = new Voucher();
+        Voucher voucher3 = new VoucherBuilder().build();
         voucherList.add(voucher3);
 
         doNothing().when(voucherRepository).deleteAll();
