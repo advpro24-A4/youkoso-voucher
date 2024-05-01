@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VoucherTest {
-    private VoucherBuilder builder;
     private Voucher voucher;
 
     @BeforeEach
@@ -84,7 +83,6 @@ public class VoucherTest {
 
     @AfterEach
     void tearDown() {
-        this.builder = null;
         this.voucher = null;
     }
 }

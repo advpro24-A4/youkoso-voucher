@@ -136,10 +136,8 @@ class VoucherRepositoryTest {
 
     @Test
     void testDeleteVoucherWithFindById() {
-        doNothing().when(voucherRepository).deleteById(anyLong());
         voucherRepository.deleteById(voucher.getId());
 
-        when(voucherRepository.findById(anyLong())).thenReturn(Optional.empty());
         Optional<Voucher> searchDeletedVoucher = voucherRepository.findById(voucher.getId());
 
         assertFalse(searchDeletedVoucher.isPresent());
@@ -147,7 +145,6 @@ class VoucherRepositoryTest {
 
     @Test
     void testDeleteVoucherWithFindAll() {
-        doNothing().when(voucherRepository).deleteById(anyLong());
         voucherRepository.deleteById(voucher.getId());
 
         List<Voucher> savedVouchers = voucherRepository.findAll();
@@ -163,6 +160,7 @@ class VoucherRepositoryTest {
         voucherList.add(voucher2);
         Voucher voucher3 = new VoucherBuilder().build();
         voucherList.add(voucher3);
+        voucherRepository.saveAll(voucherList);
 
         doNothing().when(voucherRepository).deleteAll();
         voucherRepository.deleteAll();
@@ -171,6 +169,7 @@ class VoucherRepositoryTest {
 
         assertTrue(savedVouchers.isEmpty());
     }
+
 
     @AfterEach
     void tearDown() {
