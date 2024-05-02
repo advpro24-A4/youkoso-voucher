@@ -17,6 +17,9 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public Voucher create(Voucher voucher) {
+        if (!voucher.isValid())
+            throw new IllegalArgumentException("Invalid voucher attribute");
+
         return voucherRepository.save(voucher);
     }
 
@@ -31,26 +34,33 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public Voucher findVoucherById(Long voucherId) {
-        return voucherRepository.findById(voucherId).orElse(null);
+    public Voucher findVoucherById(Long id) {
+        Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
+        if (!optionalVoucher.isPresent())
+            throw new IllegalArgumentException("There is no voucher with ID " + id);
+
+        return optionalVoucher.get();
     }
 
     @Override
-    public void edit(Long id, String name, double discountPercentage, boolean hasUsageLimit,
-            int usageLimit, double minimumOrder, int maximumDiscountAmount) {
+    public void edit(Long id, String name, int discountPercentage, boolean hasUsageLimit,
+            int usageLimit, int minimumOrder, int maximumDiscountAmount) {
+
         Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
-        if (optionalVoucher.isPresent()) {
-            Voucher voucher = optionalVoucher.get();
-            voucher.setName(name);
-            voucher.setDiscountPercentage(discountPercentage);
-            voucher.setHasUsageLimit(hasUsageLimit);
-            voucher.setUsageLimit(usageLimit);
-            voucher.setMinimumOrder(minimumOrder);
-            voucher.setMaximumDiscountAmount(maximumDiscountAmount);
-            voucherRepository.save(voucher);
-        } else {
+        if (!optionalVoucher.isPresent())
             throw new IllegalArgumentException("There is no voucher with ID " + id);
-        }
+
+        Voucher voucher = optionalVoucher.get();
+        voucher.setName(name);
+        voucher.setDiscountPercentage(discountPercentage);
+        voucher.setHasUsageLimit(hasUsageLimit);
+        voucher.setUsageLimit(usageLimit);
+        voucher.setMinimumOrder(minimumOrder);
+        voucher.setMaximumDiscountAmount(maximumDiscountAmount);
+
+        if (!voucher.isValid())
+            throw new IllegalArgumentException("Wrong voucher's attribute(s)");
+
+        voucherRepository.save(voucher);
     }
-    
 }

@@ -31,4 +31,11 @@ public class Voucher {
 
     @Column(name = "maximumDiscountAmount", columnDefinition = "integer default 2147483647")
     private int maximumDiscountAmount = Integer.MAX_VALUE;
+
+    public boolean isValid() {
+        return (discountPercentage >= 0 && discountPercentage <= 100) &&
+                usageLimit >= 0 &&
+                minimumOrder >= 0 &&
+                maximumDiscountAmount >= 0;
+    }
 }
