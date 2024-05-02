@@ -8,16 +8,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VoucherTest {
     private Voucher voucher;
+    private Voucher voucherWithDefault;
 
     @BeforeEach
     void setUp() {
         this.voucher = new VoucherBuilder()
                 .name("Discount 50%")
-                .discountPercentage(0.5)
+                .discountPercentage(50)
                 .hasUsageLimit(true)
                 .usageLimit(100)
                 .minimumOrder(50000)
                 .maximumDiscountAmount(25000)
+                .build();
+
+        this.voucherWithDefault = new VoucherBuilder()
+                .name("Discount 20%")
+                .discountPercentage(20)
+                .hasUsageLimit(false)
                 .build();
     }
 
@@ -28,7 +35,7 @@ public class VoucherTest {
 
     @Test
     void testBuildAndGetVoucherDiscountPercentage() {
-        assertEquals(0.5, this.voucher.getDiscountPercentage());
+        assertEquals(50, this.voucher.getDiscountPercentage());
     }
 
     @Test
@@ -53,32 +60,17 @@ public class VoucherTest {
 
     @Test
     void testGetUsageLimitIfDefault() {
-        Voucher voucherWithDefault = new VoucherBuilder()
-                .name("Discount 50%")
-                .discountPercentage(0.5)
-                .hasUsageLimit(true)
-                .build();
-        assertEquals(Integer.MAX_VALUE, voucherWithDefault.getUsageLimit());
+        assertEquals(Integer.MAX_VALUE, this.voucherWithDefault.getUsageLimit());
     }
 
     @Test
     void testBuildAndGetMinimumOrderIfDefault() {
-        Voucher voucherWithDefault = new VoucherBuilder()
-                .name("Discount 50%")
-                .discountPercentage(0.5)
-                .hasUsageLimit(true)
-                .build();
-        assertEquals(0.0, voucherWithDefault.getMinimumOrder());
+        assertEquals(0, this.voucherWithDefault.getMinimumOrder());
     }
 
     @Test
     void testBuildAndGetMaximumDiscountAmountIfDefault() {
-        Voucher voucherWithDefault = new VoucherBuilder()
-                .name("Discount 50%")
-                .discountPercentage(0.5)
-                .hasUsageLimit(true)
-                .build();
-        assertEquals(Integer.MAX_VALUE, voucherWithDefault.getMaximumDiscountAmount());
+        assertEquals(Integer.MAX_VALUE, this.voucherWithDefault.getMaximumDiscountAmount());
     }
 
     @AfterEach

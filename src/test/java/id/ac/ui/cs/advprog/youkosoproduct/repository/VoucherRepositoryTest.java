@@ -30,7 +30,7 @@ class VoucherRepositoryTest {
     void setUp() {
         this.voucher = new VoucherBuilder()
                 .name("Discount 50%")
-                .discountPercentage(0.5)
+                .discountPercentage(50)
                 .hasUsageLimit(true)
                 .usageLimit(100)
                 .minimumOrder(50000)

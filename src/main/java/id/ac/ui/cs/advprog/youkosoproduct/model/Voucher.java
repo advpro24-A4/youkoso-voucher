@@ -18,7 +18,7 @@ public class Voucher {
     private String name;
 
     @Column(name = "discountPercentage", nullable = false)
-    private double discountPercentage;
+    private int discountPercentage;
 
     @Column(name = "hasUsageLimit", nullable = false)
     private Boolean hasUsageLimit;
@@ -26,8 +26,8 @@ public class Voucher {
     @Column(name = "usageLimit", columnDefinition = "integer default 2147483647")
     private int usageLimit = Integer.MAX_VALUE;
 
-    @Column(name = "minimumOrder", columnDefinition = "double default 0.0")
-    private double minimumOrder = 0.0;
+    @Column(name = "minimumOrder", columnDefinition = "integer default 0")
+    private int minimumOrder = 0;
 
     @Column(name = "maximumDiscountAmount", columnDefinition = "integer default 2147483647")
     private int maximumDiscountAmount = Integer.MAX_VALUE;

@@ -2,10 +2,10 @@ package id.ac.ui.cs.advprog.youkosoproduct.model;
 
 public class VoucherBuilder {
     private String name;
-    private double discountPercentage;
+    private int discountPercentage;
     private Boolean hasUsageLimit;
     private int usageLimit = Integer.MAX_VALUE;
-    private double minimumOrder = 0.0;
+    private int minimumOrder = 0;
     private int maximumDiscountAmount = Integer.MAX_VALUE;
 
     public VoucherBuilder name(String name) {
@@ -13,7 +13,7 @@ public class VoucherBuilder {
         return this;
     }
 
-    public VoucherBuilder discountPercentage(double discountPercentage) {
+    public VoucherBuilder discountPercentage(int discountPercentage) {
         this.discountPercentage = discountPercentage;
         return this;
     }
@@ -28,7 +28,7 @@ public class VoucherBuilder {
         return this;
     }
 
-    public VoucherBuilder minimumOrder(double minimumOrder) {
+    public VoucherBuilder minimumOrder(int minimumOrder) {
         this.minimumOrder = minimumOrder;
         return this;
     }
