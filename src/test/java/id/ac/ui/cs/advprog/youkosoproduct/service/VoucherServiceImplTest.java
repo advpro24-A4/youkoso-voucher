@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +36,7 @@ public class VoucherServiceImplTest {
     void setUp() {
         this.voucher = new VoucherBuilder()
                 .name("Discount 50%")
-                .discountPercentage(0.5)
+                .discountPercentage(50)
                 .hasUsageLimit(true)
                 .usageLimit(100)
                 .minimumOrder(50000)
@@ -53,9 +54,19 @@ public class VoucherServiceImplTest {
         verify(voucherRepository, times(1)).save(voucher);
     }
 
+    void testCreateVoucherInvalidAttribute() {
+        when(voucherRepository.save(voucher))
+                .thenThrow(new IllegalArgumentException("Invalid voucher attribute"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.create(voucher));
+
+        verify(voucherRepository, times(1)).save(voucher);
+    }
+
     @Test
     void testDeleteVoucher() {
-        long voucherId = 1L;
+        Long voucherId = 1L;
 
         service.delete(voucherId);
 
@@ -76,23 +87,20 @@ public class VoucherServiceImplTest {
 
     @Test
     void testFindVoucherById() {
-        long voucherId = 1L;
+        when(voucherRepository.findById(1L)).thenReturn(Optional.of(this.voucher));
 
-        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
-        Voucher foundVoucher = service.findVoucherById(voucherId);
+        Voucher obtainedVoucher = service.findVoucherById(1L);
 
-        assertEquals(voucher, foundVoucher);
-        verify(voucherRepository, times(1)).findById(voucherId);
+        assertEquals(voucher, obtainedVoucher);
+        verify(voucherRepository, times(1)).findById(1L);
     }
 
     @Test
-    void testFindVoucherByIdIfNotFound() {
-        long voucherId = -1L;
+    void testFindVoucherByIdNotFound() {
+        when(voucherRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        when(voucherRepository.findById(voucherId)).thenReturn(Optional.empty());
-
-        assertNull(service.findVoucherById(voucherId));
-        verify(voucherRepository, times(1)).findById(voucherId);
+        assertThrows(IllegalArgumentException.class, () -> service.findVoucherById(2L));
+        verify(voucherRepository, times(1)).findById(2L);
     }
 
     @Test
@@ -101,7 +109,7 @@ public class VoucherServiceImplTest {
                 .thenReturn(Optional.of(voucher));
 
         String editedName = "Edited Voucher";
-        double editedDiscountPercentage = 0.3;
+        int editedDiscountPercentage = 30;
         boolean editedHasUsageLimit = true;
         int editedUsageLimit = 30;
         int editedMinimumOrder = 300000;
@@ -122,17 +130,19 @@ public class VoucherServiceImplTest {
 
     @Test
     void testEditVoucherWithDefaultAttributesShouldRemainsUnchanged() {
-        when(voucherRepository.findById(1L))
+        Long voucherId = 1L;
+
+        when(voucherRepository.findById(voucherId))
                 .thenReturn(Optional.of(voucher));
 
         Voucher voucherWithDefault = new VoucherBuilder()
                 .name("Discount 50%")
-                .discountPercentage(0.5)
+                .discountPercentage(50)
                 .hasUsageLimit(false)
                 .build();
 
         String editedName = "Edited Voucher";
-        double editedDiscountPercentage = 0.3;
+        int editedDiscountPercentage = 30;
         boolean editedHasUsageLimit = true;
 
         service.edit(1L, editedName, editedDiscountPercentage, editedHasUsageLimit,
@@ -143,7 +153,7 @@ public class VoucherServiceImplTest {
         assertEquals(editedDiscountPercentage, voucher.getDiscountPercentage());
         assertEquals(editedHasUsageLimit, voucher.getHasUsageLimit());
         assertEquals(Integer.MAX_VALUE, voucher.getUsageLimit());
-        assertEquals(0.0, voucher.getMinimumOrder());
+        assertEquals(0, voucher.getMinimumOrder());
         assertEquals(Integer.MAX_VALUE, voucher.getMaximumDiscountAmount());
 
         verify(voucherRepository, times(1)).save(voucher);
@@ -151,18 +161,20 @@ public class VoucherServiceImplTest {
 
     @Test
     void testEditVoucherNotFound() {
-        when(voucherRepository.findById(-1L))
+        Long voucherId = 2L;
+
+        when(voucherRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
         String editedName = "Edited Voucher";
-        double editedDiscountPercentage = 0.3;
+        int editedDiscountPercentage = 30;
         boolean editedHasUsageLimit = true;
         int editedUsageLimit = 30;
         int editedMinimumOrder = 300000;
         int editedMaximumDiscountAmount = 30000;
 
         assertThrows(IllegalArgumentException.class, () -> {
-            service.edit(-1L, editedName, editedDiscountPercentage, editedHasUsageLimit,
+            service.edit(voucherId, editedName, editedDiscountPercentage, editedHasUsageLimit,
                     editedUsageLimit, editedMinimumOrder, editedMaximumDiscountAmount);
         });
 
