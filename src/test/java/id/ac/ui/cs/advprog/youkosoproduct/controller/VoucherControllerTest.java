@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -180,6 +181,17 @@ public class VoucherControllerTest {
     }
 
     @Test
+        public void testFindAllVouchersException() throws Exception {
+        when(voucherService.findAll()).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/voucher/api/read-all"))
+                .andExpect(status().isBadRequest());
+
+        verify(voucherService, times(1)).findAll();
+        verifyNoMoreInteractions(voucherService);
+        }
+
+    @Test
     void testUpdateVoucher() throws Exception {
         Voucher updatedVoucher = new VoucherBuilder()
                 .name("Updated Voucher")
@@ -253,6 +265,17 @@ public class VoucherControllerTest {
                 .andExpect(status().isOk());
 
         verify(voucherService, times(1)).delete(1L);
+        verifyNoMoreInteractions(voucherService);
+    }
+
+    @Test
+    public void testDeleteNonExistentVoucher() throws Exception {
+        doThrow(new IllegalArgumentException()).when(voucherService).delete(anyLong());
+
+        mockMvc.perform(delete("/voucher/api/delete/{id}", 3L))
+                .andExpect(status().isBadRequest());
+
+        verify(voucherService, times(1)).delete(3L);
         verifyNoMoreInteractions(voucherService);
     }
 
