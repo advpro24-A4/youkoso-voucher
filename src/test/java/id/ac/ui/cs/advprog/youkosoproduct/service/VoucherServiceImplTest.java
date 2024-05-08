@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -45,6 +44,7 @@ public class VoucherServiceImplTest {
         this.voucher.setId(1L);
     }
 
+    @Test
     void testCreateVoucher() {
         when(voucherRepository.save(voucher)).thenReturn(voucher);
 
@@ -54,23 +54,41 @@ public class VoucherServiceImplTest {
         verify(voucherRepository, times(1)).save(voucher);
     }
 
+    @Test
     void testCreateVoucherInvalidAttribute() {
-        when(voucherRepository.save(voucher))
-                .thenThrow(new IllegalArgumentException("Invalid voucher attribute"));
+        Voucher invalidVoucher = new Voucher();
+        invalidVoucher.setDiscountPercentage(101);
+        invalidVoucher.setUsageLimit(-1);
+        invalidVoucher.setMinimumOrder(-1);
+        invalidVoucher.setMaximumDiscountAmount(-1);
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.create(voucher));
+                () -> service.create(invalidVoucher));
 
-        verify(voucherRepository, times(1)).save(voucher);
+        verify(voucherRepository, times(0)).save(voucher);
     }
 
     @Test
     void testDeleteVoucher() {
         Long voucherId = 1L;
 
+        when(voucherRepository.existsById(voucherId)).thenReturn(true);
+
         service.delete(voucherId);
 
         verify(voucherRepository, times(1)).deleteById(voucherId);
+    }
+
+    @Test
+    void testDeleteNonExistentVoucher() {
+        Long voucherId = 3L;
+
+        when(voucherRepository.existsById(voucherId)).thenReturn(false);
+        
+        assertThrows(IllegalArgumentException.class,
+                () -> service.delete(voucherId));
+
+        verify(voucherRepository, times(0)).deleteById(voucherId);
     }
 
     @Test
@@ -179,5 +197,26 @@ public class VoucherServiceImplTest {
         });
 
         verify(voucherRepository, never()).save(any());
+    }
+
+    @Test
+    void testEditVoucherInvalidAttributes() {
+        Long voucherId = 1L;
+
+        String editedName = "Edited Voucher";
+        int editedDiscountPercentage = -1;
+        boolean editedHasUsageLimit = true;
+        int editedUsageLimit = -1;
+        int editedMinimumOrder = -1;
+        int editedMaximumDiscountAmount = -1;
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(this.voucher));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.edit(voucherId, editedName, editedDiscountPercentage, editedHasUsageLimit,
+                    editedUsageLimit, editedMinimumOrder, editedMaximumDiscountAmount);
+        });
+
+        verify(voucherRepository, times(0)).save(voucher);
     }
 }
