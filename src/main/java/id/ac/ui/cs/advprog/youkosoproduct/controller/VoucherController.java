@@ -4,11 +4,14 @@ import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.scheduling.annotation.Async;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/voucher")
@@ -17,123 +20,121 @@ public class VoucherController {
     @Autowired
     private VoucherService voucherService;
 
+    private static final Logger logger = LoggerFactory.getLogger(VoucherController.class);
+
+    @Async
     @PutMapping("/{voucherId}")
-    public String useVoucher(@PathVariable("id") Long id, @ModelAttribute Voucher voucherToUse) {
-        return "";
+    public CompletableFuture<ResponseEntity<?>> useVoucher(@PathVariable("voucherId") Long voucherId,
+            @ModelAttribute Voucher voucherToUse) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                // do something
+                return ResponseEntity.ok("Voucher used successfully");
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Failed to use voucher: " + e.getMessage());
+            }
+        });
     }
 
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    public String voucherListPage() {
-        @SuppressWarnings("rawtypes")
-        ResponseEntity responseEntity = null;
-
-        try {
-            List<Voucher> allVouchers = voucherService.findAll();
-            responseEntity = ResponseEntity.ok(allVouchers);
-        } catch (Exception e) {
-            System.out.println("Error in retrieving vouchers information!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return "voucher_list_page";
+    @Async
+    @GetMapping("/list")
+    public CompletableFuture<ResponseEntity<?>> voucherListPage() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<Voucher> allVouchers = voucherService.findAll();
+                return ResponseEntity.ok(allVouchers);
+            } catch (Exception e) {
+                logger.error("Error in retrieving vouchers information!", e);
+                return ResponseEntity.badRequest().body("Failed to retrieve vouchers information: " + e.getMessage());
+            }
+        });
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public String getVoucherDetail(@PathVariable("id") Long id) {
-        @SuppressWarnings("rawtypes")
-        ResponseEntity responseEntity = null;
-
-        try {
-            Voucher obtainedVoucher = voucherService.findVoucherById(id);
-            responseEntity = ResponseEntity.ok(obtainedVoucher);
-        } catch (Exception e) {
-            System.out.println("Error in retrieving voucher information!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return "voucher_page";
+    @Async
+    @GetMapping("/{id}")
+    public CompletableFuture<ResponseEntity<?>> getVoucherDetail(@PathVariable("id") Long id) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                Voucher obtainedVoucher = voucherService.findVoucherById(id);
+                return ResponseEntity.ok(obtainedVoucher);
+            } catch (Exception e) {
+                logger.error("Error in retrieving voucher information!", e);
+                return ResponseEntity.badRequest().body("Failed to retrieve voucher information: " + e.getMessage());
+            }
+        });
     }
 
-    @SuppressWarnings("rawtypes")
-    @RequestMapping(value = "/api/create", method = RequestMethod.POST)
-    public ResponseEntity createVoucher(@RequestBody Voucher voucher) {
-        ResponseEntity responseEntity = null;
-
-        try {
-            voucherService.create(voucher);
-            responseEntity = ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.out.println("Error in creating voucher!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return responseEntity;
+    @Async
+    @PostMapping("/api/create")
+    public CompletableFuture<ResponseEntity<?>> createVoucher(@RequestBody Voucher voucher) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                voucherService.create(voucher);
+                return ResponseEntity.ok().build();
+            } catch (Exception e) {
+                logger.error("Error in creating voucher!", e);
+                return ResponseEntity.badRequest().body("Failed to create voucher: " + e.getMessage());
+            }
+        });
     }
 
-    @SuppressWarnings("rawtypes")
-    @RequestMapping(value = "/api/read/{id}", method = RequestMethod.GET)
-    public ResponseEntity findVoucherById(@PathVariable("id") Long id) {
-        ResponseEntity responseEntity = null;
-
-        try {
-            Voucher obtainedVoucher = voucherService.findVoucherById(id);
-            responseEntity = ResponseEntity.ok(obtainedVoucher);
-        } catch (Exception e) {
-            System.out.println("Error in find voucher by id!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return responseEntity;
+    @Async
+    @GetMapping("/api/read/{id}")
+    public CompletableFuture<ResponseEntity<?>> findVoucherById(@PathVariable("id") Long id) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                Voucher obtainedVoucher = voucherService.findVoucherById(id);
+                return ResponseEntity.ok(obtainedVoucher);
+            } catch (Exception e) {
+                logger.error("Error in find voucher by id!", e);
+                return ResponseEntity.badRequest().body("Failed to find voucher by id: " + e.getMessage());
+            }
+        });
     }
 
-    @SuppressWarnings("rawtypes")
-    @RequestMapping(value = "/api/read-all", method = RequestMethod.GET)
-    public ResponseEntity findAllVouchers() {
-        ResponseEntity responseEntity = null;
-
-        try {
-            List<Voucher> allVouchers = voucherService.findAll();
-            responseEntity = ResponseEntity.ok(allVouchers);
-        } catch (Exception e) {
-            System.out.println("Error in find all vouchers!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return responseEntity;
+    @Async
+    @GetMapping("/api/read-all")
+    public CompletableFuture<ResponseEntity<?>> findAllVouchers() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                List<Voucher> allVouchers = voucherService.findAll();
+                return ResponseEntity.ok(allVouchers);
+            } catch (Exception e) {
+                logger.error("Error in find all vouchers!", e);
+                return ResponseEntity.badRequest().body("Failed to find all vouchers: " + e.getMessage());
+            }
+        });
     }
 
-    @SuppressWarnings("rawtypes")
-    @RequestMapping(value = "/api/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity updateVoucher(@RequestBody Voucher voucher) {
-        ResponseEntity responseEntity = null;
-
-        try {
-            voucherService.edit(
-                    voucher.getId(), voucher.getName(), voucher.getDiscountPercentage(),
-                    voucher.getHasUsageLimit(), voucher.getUsageLimit(),
-                    voucher.getMinimumOrder(), voucher.getMaximumDiscountAmount());
-            responseEntity = ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.out.println("Error in update voucher!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return responseEntity;
+    @Async
+    @PutMapping("/api/edit/{id}")
+    public CompletableFuture<ResponseEntity<?>> updateVoucher(@PathVariable("id") Long id,
+            @RequestBody Voucher voucher) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                voucherService.edit(
+                        id, voucher.getName(), voucher.getDiscountPercentage(),
+                        voucher.getHasUsageLimit(), voucher.getUsageLimit(),
+                        voucher.getMinimumOrder(), voucher.getMaximumDiscountAmount());
+                return ResponseEntity.ok().build();
+            } catch (Exception e) {
+                logger.error("Error in update voucher!", e);
+                return ResponseEntity.badRequest().body("Failed to update voucher: " + e.getMessage());
+            }
+        });
     }
 
-    @SuppressWarnings("rawtypes")
-    @RequestMapping(value = "/api/delete/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity deleteVoucher(@PathVariable("id") Long id) {
-        ResponseEntity responseEntity = null;
-
-        try {
-            voucherService.delete(id);
-            responseEntity = ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.out.println("Error in delete voucher!");
-            responseEntity = ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return responseEntity;
+    @Async
+    @DeleteMapping("/api/delete/{id}")
+    public CompletableFuture<ResponseEntity<?>> deleteVoucher(@PathVariable("id") Long id) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                voucherService.delete(id);
+                return ResponseEntity.ok().build();
+            } catch (Exception e) {
+                logger.error("Error in delete voucher!", e);
+                return ResponseEntity.badRequest().body("Failed to delete voucher: " + e.getMessage());
+            }
+        });
     }
 }
