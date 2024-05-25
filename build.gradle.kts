@@ -3,7 +3,7 @@ plugins {
 	jacoco
 	id("org.springframework.boot") version "3.2.5"
 	id("io.spring.dependency-management") version "1.1.4"
-	id ("org.flywaydb.flyway") version "10.11.0"
+	id("org.flywaydb.flyway") version "10.11.0"
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -20,7 +20,7 @@ configurations {
 }
 
 flyway {
-	url = "jdbc:postgresql://localhost:5432/adpro?user=postgres&password=raviehasan"
+	url = "jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/adpro?user=postgres.lsrqqazbjxscfnbfyfin&password=adpro-youkoso"
 }
 
 repositories {
