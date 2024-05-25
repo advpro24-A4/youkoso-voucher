@@ -190,8 +190,7 @@ public class VoucherControllerTest {
     
         when(voucherService.findAll()).thenReturn(vouchers);
     
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
@@ -225,8 +224,7 @@ public class VoucherControllerTest {
     
         when(voucherService.findAll()).thenReturn(vouchers);
     
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
@@ -243,8 +241,7 @@ public class VoucherControllerTest {
         when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.findAll()).thenThrow(new RuntimeException("Error retrieving vouchers"));
     
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     

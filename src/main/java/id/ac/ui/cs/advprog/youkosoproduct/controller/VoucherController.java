@@ -73,26 +73,6 @@ public class VoucherController {
     }
 
     @Async
-    @GetMapping("/{id}")
-    public CompletableFuture<ResponseEntity<?>> getVoucherDetail(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @PathVariable("id") Long id) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                AuthResponse authResponse = authService.validateToken(authHeader).join();
-                if (authResponse == null) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                }
-
-                Voucher obtainedVoucher = voucherService.findVoucherById(id);
-                return ResponseEntity.ok(obtainedVoucher);
-            } catch (Exception e) {
-                logger.error("Error in retrieving voucher information!", e);
-                return ResponseEntity.badRequest().body("Failed to retrieve voucher information: " + e.getMessage());
-            }
-        });
-    }
-
-    @Async
     @PostMapping("/api/create")
     public CompletableFuture<ResponseEntity<?>> createVoucher(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @RequestBody Voucher voucher) {
@@ -134,15 +114,9 @@ public class VoucherController {
 
     @Async
     @GetMapping("/api/read-all")
-    public CompletableFuture<ResponseEntity<?>> findAllVouchers(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public CompletableFuture<ResponseEntity<?>> findAllVouchers() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                AuthResponse authResponse = authService.validateToken(authHeader).join();
-                if (authResponse == null) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                }
-
                 List<Voucher> allVouchers = voucherService.findAll();
                 return ResponseEntity.ok(allVouchers);
             } catch (Exception e) {
