@@ -90,36 +90,31 @@ public class VoucherTest {
 
     @Test
     void testIsValidIfDiscountPercentageNegative() {
-        Voucher invalidVoucher = new Voucher();
-        invalidVoucher.setDiscountPercentage(-1);
+        this.invalidVoucher.setDiscountPercentage(-1);
         assertFalse(invalidVoucher.isValid());
     }
 
     @Test
     void testIsValidIfDiscountPercentageGreaterThan100() {
-        Voucher invalidVoucher = new Voucher();
-        invalidVoucher.setDiscountPercentage(101);
+        this.invalidVoucher.setDiscountPercentage(101);
         assertFalse(invalidVoucher.isValid());
     }
 
     @Test
     void testIsValidIfUsageLimitNegative() {
-        Voucher invalidVoucher = new Voucher();
-        invalidVoucher.setUsageLimit(-1);
+        this.invalidVoucher.setUsageLimit(-1);
         assertFalse(invalidVoucher.isValid());
     }
 
     @Test
     void testIsValidIfMinimumOrderNegative() {
-        Voucher invalidVoucher = new Voucher();
-        invalidVoucher.setMinimumOrder(-1);
+        this.invalidVoucher.setMinimumOrder(-1);
         assertFalse(invalidVoucher.isValid());
     }
 
     @Test
     void testIsValidIfMaximumDiscountAmountNegative() {
-        Voucher invalidVoucher = new Voucher();
-        invalidVoucher.setMaximumDiscountAmount(-1);
+        this.invalidVoucher.setMaximumDiscountAmount(-1);
         assertFalse(invalidVoucher.isValid());
     }
 

@@ -15,6 +15,8 @@ public class VoucherServiceImpl implements VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
+    private static final String VOUCHER_NOT_FOUND_MESSAGE = "There is no voucher with ID ";
+
     @Override
     public Voucher create(Voucher voucher) {
         if (!voucher.isValid())
@@ -26,7 +28,7 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public void delete(Long voucherId) {
         if (!voucherRepository.existsById(voucherId)) 
-            throw new IllegalArgumentException("There is no voucher with ID " + voucherId);
+            throw new IllegalArgumentException(VOUCHER_NOT_FOUND_MESSAGE + voucherId);
         voucherRepository.deleteById(voucherId);
     }
 
@@ -39,7 +41,7 @@ public class VoucherServiceImpl implements VoucherService {
     public Voucher findVoucherById(Long id) {
         Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
         if (!optionalVoucher.isPresent())
-            throw new IllegalArgumentException("There is no voucher with ID " + id);
+            throw new IllegalArgumentException(VOUCHER_NOT_FOUND_MESSAGE + id);
 
         return optionalVoucher.get();
     }
@@ -50,7 +52,7 @@ public class VoucherServiceImpl implements VoucherService {
 
         Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
         if (!optionalVoucher.isPresent())
-            throw new IllegalArgumentException("There is no voucher with ID " + id);
+            throw new IllegalArgumentException(VOUCHER_NOT_FOUND_MESSAGE + id);
 
         Voucher voucher = optionalVoucher.get();
         
