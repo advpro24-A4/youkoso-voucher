@@ -1,23 +1,29 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
 import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
+import id.ac.ui.cs.advprog.youkosoproduct.service.AuthService;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import java.util.concurrent.CompletableFuture;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,9 +35,13 @@ public class VoucherControllerTest {
     private MockMvc mockMvc;
     private Voucher voucher;
     private Voucher voucherWithDefault;
+    private CompletableFuture<AuthResponse> futureAuthResponse;
 
     @Mock
     private VoucherService voucherService;
+
+    @Mock
+    private AuthService authService;
 
     @InjectMocks
     private VoucherController voucherController;
@@ -40,6 +50,8 @@ public class VoucherControllerTest {
     public void setup() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(voucherController).build();
+
+        this.futureAuthResponse = CompletableFuture.completedFuture(new AuthResponse());
 
         this.voucher = new VoucherBuilder()
                 .name("Voucher 1")
@@ -61,9 +73,11 @@ public class VoucherControllerTest {
 
     @Test
     public void testCreateVoucher() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.create(any(Voucher.class))).thenReturn(this.voucherWithDefault);
 
         MvcResult mvcResult = mockMvc.perform(post("/voucher/api/create")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(voucher)))
                 .andExpect(request().asyncStarted())
@@ -78,10 +92,12 @@ public class VoucherControllerTest {
 
     @Test
     public void testCreateVoucherBadRequest() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.create(any(Voucher.class)))
                 .thenThrow(new IllegalArgumentException("Invalid voucher attribute"));
 
         MvcResult mvcResult = mockMvc.perform(post("/voucher/api/create")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(voucher)))
                 .andExpect(request().asyncStarted())
@@ -97,9 +113,11 @@ public class VoucherControllerTest {
 
     @Test
     public void testFindVoucherById() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.findVoucherById(1L)).thenReturn(this.voucher);
 
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read/{id}", 1L))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read/{id}", 1L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -120,10 +138,12 @@ public class VoucherControllerTest {
 
     @Test
     public void testFindVoucherByIdIfNotFound() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.findVoucherById(2L))
                 .thenThrow(new IllegalArgumentException("There is no voucher with ID " + 2L));
 
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read/{id}", 2L))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read/{id}", 2L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -137,9 +157,11 @@ public class VoucherControllerTest {
 
     @Test
     public void testFindVoucherByIdWithDefaultAttributes() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.findVoucherById(2L)).thenReturn(this.voucherWithDefault);
 
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read/{id}", 2L))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read/{id}", 2L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -160,13 +182,16 @@ public class VoucherControllerTest {
 
     @Test
     public void testFindAllVouchers() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
+
         List<Voucher> vouchers = new ArrayList<>();
         vouchers.add(this.voucher);
         vouchers.add(this.voucherWithDefault);
     
         when(voucherService.findAll()).thenReturn(vouchers);
     
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all"))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
@@ -194,11 +219,14 @@ public class VoucherControllerTest {
     
     @Test
     public void testFindAllVouchersIfEmpty() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
+
         List<Voucher> vouchers = new ArrayList<>();
     
         when(voucherService.findAll()).thenReturn(vouchers);
     
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all"))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
@@ -212,9 +240,11 @@ public class VoucherControllerTest {
     
     @Test
     public void testFindAllVouchersException() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
         when(voucherService.findAll()).thenThrow(new RuntimeException("Error retrieving vouchers"));
     
-        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all"))
+        MvcResult mvcResult = mockMvc.perform(get("/voucher/api/read-all")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
@@ -228,6 +258,8 @@ public class VoucherControllerTest {
     
     @Test
     void testUpdateVoucher() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
+
         Voucher updatedVoucher = new VoucherBuilder()
                 .name("Updated Voucher")
                 .discountPercentage(90)
@@ -240,6 +272,7 @@ public class VoucherControllerTest {
     
         MvcResult mvcResult = mockMvc.perform(put("/voucher/api/edit/{voucherId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken")
                 .content(asJsonString(updatedVoucher)))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -261,6 +294,8 @@ public class VoucherControllerTest {
     
     @Test
     void testUpdateVoucherVoucherNotFound() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
+
         Voucher updatedVoucher = new VoucherBuilder()
                 .name("Updated Voucher")
                 .discountPercentage(90)
@@ -282,6 +317,7 @@ public class VoucherControllerTest {
                         eq(150));
     
         MvcResult mvcResult = mockMvc.perform(put("/voucher/api/edit/{voucherId}", 3L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(updatedVoucher)))
                 .andExpect(request().asyncStarted())
@@ -305,7 +341,10 @@ public class VoucherControllerTest {
     
     @Test
     public void testDeleteVoucher() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(delete("/voucher/api/delete/{id}", 1L))
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
+
+        MvcResult mvcResult = mockMvc.perform(delete("/voucher/api/delete/{id}", 1L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
@@ -318,9 +357,12 @@ public class VoucherControllerTest {
     
     @Test
     public void testDeleteNonExistentVoucher() throws Exception {
+        when(authService.validateToken(anyString())).thenReturn(this.futureAuthResponse);
+
         doThrow(new IllegalArgumentException("There is no voucher with ID 3")).when(voucherService).delete(3L);
     
-        MvcResult mvcResult = mockMvc.perform(delete("/voucher/api/delete/{id}", 3L))
+        MvcResult mvcResult = mockMvc.perform(delete("/voucher/api/delete/{id}", 3L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer someToken"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
     

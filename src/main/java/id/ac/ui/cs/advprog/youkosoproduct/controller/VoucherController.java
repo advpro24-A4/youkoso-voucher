@@ -1,12 +1,16 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
+import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+import id.ac.ui.cs.advprog.youkosoproduct.service.AuthService;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.scheduling.annotation.Async;
@@ -17,17 +21,29 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/voucher")
 public class VoucherController {
 
+    private final VoucherService voucherService;
+    private final AuthService authService;
+
     @Autowired
-    private VoucherService voucherService;
+    public VoucherController(VoucherService voucherService, AuthService authService) {
+        this.voucherService = voucherService;
+        this.authService = authService;
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(VoucherController.class);
 
     @Async
-    @PutMapping("/{voucherId}")
-    public CompletableFuture<ResponseEntity<?>> useVoucher(@PathVariable("voucherId") Long voucherId,
+    @PutMapping("/list/{voucherId}")
+    public CompletableFuture<ResponseEntity<?>> useVoucher(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @PathVariable("voucherId") Long voucherId,
             @ModelAttribute Voucher voucherToUse) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 // do something
                 return ResponseEntity.ok("Voucher used successfully");
             } catch (Exception e) {
@@ -38,9 +54,15 @@ public class VoucherController {
 
     @Async
     @GetMapping("/list")
-    public CompletableFuture<ResponseEntity<?>> voucherListPage() {
+    public CompletableFuture<ResponseEntity<?>> voucherListPage(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 List<Voucher> allVouchers = voucherService.findAll();
                 return ResponseEntity.ok(allVouchers);
             } catch (Exception e) {
@@ -52,9 +74,15 @@ public class VoucherController {
 
     @Async
     @GetMapping("/{id}")
-    public CompletableFuture<ResponseEntity<?>> getVoucherDetail(@PathVariable("id") Long id) {
+    public CompletableFuture<ResponseEntity<?>> getVoucherDetail(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @PathVariable("id") Long id) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 Voucher obtainedVoucher = voucherService.findVoucherById(id);
                 return ResponseEntity.ok(obtainedVoucher);
             } catch (Exception e) {
@@ -66,9 +94,15 @@ public class VoucherController {
 
     @Async
     @PostMapping("/api/create")
-    public CompletableFuture<ResponseEntity<?>> createVoucher(@RequestBody Voucher voucher) {
+    public CompletableFuture<ResponseEntity<?>> createVoucher(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @RequestBody Voucher voucher) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 voucherService.create(voucher);
                 return ResponseEntity.ok().build();
             } catch (Exception e) {
@@ -80,9 +114,15 @@ public class VoucherController {
 
     @Async
     @GetMapping("/api/read/{id}")
-    public CompletableFuture<ResponseEntity<?>> findVoucherById(@PathVariable("id") Long id) {
+    public CompletableFuture<ResponseEntity<?>> findVoucherById(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @PathVariable("id") Long id) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 Voucher obtainedVoucher = voucherService.findVoucherById(id);
                 return ResponseEntity.ok(obtainedVoucher);
             } catch (Exception e) {
@@ -94,9 +134,15 @@ public class VoucherController {
 
     @Async
     @GetMapping("/api/read-all")
-    public CompletableFuture<ResponseEntity<?>> findAllVouchers() {
+    public CompletableFuture<ResponseEntity<?>> findAllVouchers(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 List<Voucher> allVouchers = voucherService.findAll();
                 return ResponseEntity.ok(allVouchers);
             } catch (Exception e) {
@@ -108,10 +154,17 @@ public class VoucherController {
 
     @Async
     @PutMapping("/api/edit/{id}")
-    public CompletableFuture<ResponseEntity<?>> updateVoucher(@PathVariable("id") Long id,
+    public CompletableFuture<ResponseEntity<?>> updateVoucher(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @PathVariable("id") Long id,
             @RequestBody Voucher voucher) {
+
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 voucherService.edit(
                         id, voucher.getName(), voucher.getDiscountPercentage(),
                         voucher.getHasUsageLimit(), voucher.getUsageLimit(),
@@ -126,9 +179,15 @@ public class VoucherController {
 
     @Async
     @DeleteMapping("/api/delete/{id}")
-    public CompletableFuture<ResponseEntity<?>> deleteVoucher(@PathVariable("id") Long id) {
+    public CompletableFuture<ResponseEntity<?>> deleteVoucher(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @PathVariable("id") Long id) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                AuthResponse authResponse = authService.validateToken(authHeader).join();
+                if (authResponse == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
                 voucherService.delete(id);
                 return ResponseEntity.ok().build();
             } catch (Exception e) {

@@ -45,6 +45,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	implementation("org.springframework.boot:spring-boot-starter-actuator:3.2.5")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus:1.12.5")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate6:2.15.2")
 }
 
 buildscript {
@@ -56,24 +57,6 @@ buildscript {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-}
-
-tasks.register<Test>("unitTest") {
-	description = "Runs unit tests."
-	group = "verification"
-
-	filter {
-		excludeTestsMatching("*FunctionalTest")
-	}
-}
-
-tasks.register<Test>("functionalTest") {
-	description = "Runs functional tests."
-	group = "verification"
-
-	filter {
-		includeTestsMatching("*FunctionalTest")
-	}
 }
 
 tasks.withType<Test>().configureEach {
@@ -90,12 +73,10 @@ tasks.test {
 
 tasks.jacocoTestReport {
 	classDirectories.setFrom(files(classDirectories.files.map {
-       fileTree(it) { exclude("**/*Application**") }
+       fileTree(it) { 
+			exclude("**/*Application**")
+			exclude("**/*Config**")
+		}
    	}))
 	dependsOn(tasks.test)
-	reports {
-		xml.required.set(true)
-		csv.required.set(true)
-		html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
-	}
 }
