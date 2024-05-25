@@ -20,7 +20,9 @@ configurations {
 }
 
 flyway {
-	url = "jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/adpro?user=postgres.lsrqqazbjxscfnbfyfin&password=adpro-youkoso"
+    url = "jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+    user = "postgres.lsrqqazbjxscfnbfyfin"
+    password = "adpro-youkoso"
 }
 
 repositories {
