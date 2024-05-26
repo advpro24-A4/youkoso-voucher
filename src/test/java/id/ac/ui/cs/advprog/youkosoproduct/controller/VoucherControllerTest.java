@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
-import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
+import id.ac.ui.cs.advprog.youkosoproduct.model.builder.VoucherBuilder;
 import id.ac.ui.cs.advprog.youkosoproduct.service.AuthService;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 import org.junit.jupiter.api.BeforeEach;

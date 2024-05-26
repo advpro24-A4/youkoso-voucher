@@ -1,7 +1,7 @@
 package id.ac.ui.cs.advprog.youkosoproduct.service;
 
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
-import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
+import id.ac.ui.cs.advprog.youkosoproduct.model.builder.VoucherBuilder;
 import id.ac.ui.cs.advprog.youkosoproduct.repository.VoucherRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

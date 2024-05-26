@@ -1,7 +1,13 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
 import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
+import id.ac.ui.cs.advprog.youkosoproduct.dto.DefaultResponse;
+import id.ac.ui.cs.advprog.youkosoproduct.dto.UseVoucherRequest;
+import id.ac.ui.cs.advprog.youkosoproduct.dto.VoucherListRequest;
+import id.ac.ui.cs.advprog.youkosoproduct.model.Payment;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+import id.ac.ui.cs.advprog.youkosoproduct.model.builder.DefaultResponseBuilder;
+import id.ac.ui.cs.advprog.youkosoproduct.repository.PaymentRepository;
 import id.ac.ui.cs.advprog.youkosoproduct.service.AuthService;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 
@@ -14,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.scheduling.annotation.Async;
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,22 +28,18 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/voucher")
 public class VoucherController {
 
-    private final VoucherService voucherService;
-    private final AuthService authService;
+    @Autowired
+    private VoucherService voucherService;
 
     @Autowired
-    public VoucherController(VoucherService voucherService, AuthService authService) {
-        this.voucherService = voucherService;
-        this.authService = authService;
-    }
+    private AuthService authService;
 
     private static final Logger logger = LoggerFactory.getLogger(VoucherController.class);
 
     @Async
-    @PutMapping("/list/{voucherId}")
+    @PutMapping("/use/{voucherId}")
     public CompletableFuture<ResponseEntity<?>> useVoucher(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @PathVariable("voucherId") Long voucherId,
-            @ModelAttribute Voucher voucherToUse) {
+            @RequestBody UseVoucherRequest useVoucherRequest) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AuthResponse authResponse = authService.validateToken(authHeader).join();
@@ -44,8 +47,17 @@ public class VoucherController {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
 
-                // do something
-                return ResponseEntity.ok("Voucher used successfully");
+                Long voucherId = useVoucherRequest.getVoucherId();
+                Long paymentId = useVoucherRequest.getPaymentId();
+                voucherService.useVoucher(voucherId, paymentId);
+
+                DefaultResponse<String> response = new DefaultResponseBuilder<String>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data("Voucher used successfully")
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body("Failed to use voucher: " + e.getMessage());
             }
@@ -55,7 +67,8 @@ public class VoucherController {
     @Async
     @GetMapping("/list")
     public CompletableFuture<ResponseEntity<?>> voucherListPage(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestBody VoucherListRequest voucherListRequest) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AuthResponse authResponse = authService.validateToken(authHeader).join();
@@ -63,8 +76,18 @@ public class VoucherController {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
 
+                if (voucherListRequest.getPaymentId() == null) {
+                    throw new BadRequestException("Invalid request");
+                }
+
                 List<Voucher> allVouchers = voucherService.findAll();
-                return ResponseEntity.ok(allVouchers);
+                DefaultResponse<List<Voucher>> response = new DefaultResponseBuilder<List<Voucher>>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data(allVouchers)
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 logger.error("Error in retrieving vouchers information!", e);
                 return ResponseEntity.badRequest().body("Failed to retrieve vouchers information: " + e.getMessage());

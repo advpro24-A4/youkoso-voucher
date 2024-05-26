@@ -1,5 +1,8 @@
 package id.ac.ui.cs.advprog.youkosoproduct.model;
 
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,5 +40,9 @@ public class Voucher {
                 usageLimit >= 0 &&
                 minimumOrder >= 0 &&
                 maximumDiscountAmount >= 0;
+    }
+
+    public void decrementUsageLimit() {
+        usageLimit--;
     }
 }

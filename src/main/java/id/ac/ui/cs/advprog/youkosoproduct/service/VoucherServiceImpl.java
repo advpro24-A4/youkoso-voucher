@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import id.ac.ui.cs.advprog.youkosoproduct.model.Payment;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+import id.ac.ui.cs.advprog.youkosoproduct.repository.PaymentRepository;
 import id.ac.ui.cs.advprog.youkosoproduct.repository.VoucherRepository;
 
 @Service
@@ -14,6 +16,9 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Autowired
     private VoucherRepository voucherRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     private static final String VOUCHER_NOT_FOUND_MESSAGE = "There is no voucher with ID ";
 
@@ -27,7 +32,7 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public void delete(Long voucherId) {
-        if (!voucherRepository.existsById(voucherId)) 
+        if (!voucherRepository.existsById(voucherId))
             throw new IllegalArgumentException(VOUCHER_NOT_FOUND_MESSAGE + voucherId);
         voucherRepository.deleteById(voucherId);
     }
@@ -55,7 +60,7 @@ public class VoucherServiceImpl implements VoucherService {
             throw new IllegalArgumentException(VOUCHER_NOT_FOUND_MESSAGE + id);
 
         Voucher voucher = optionalVoucher.get();
-        
+
         Voucher editedVoucher = new Voucher();
         editedVoucher.setName(name);
         editedVoucher.setDiscountPercentage(discountPercentage);
@@ -64,9 +69,9 @@ public class VoucherServiceImpl implements VoucherService {
         editedVoucher.setMinimumOrder(minimumOrder);
         editedVoucher.setMaximumDiscountAmount(maximumDiscountAmount);
 
-        if (!editedVoucher.isValid()) 
+        if (!editedVoucher.isValid())
             throw new IllegalArgumentException("Invalid voucher's attribute(s)");
-        
+
         voucher.setName(name);
         voucher.setDiscountPercentage(discountPercentage);
         voucher.setHasUsageLimit(hasUsageLimit);
@@ -75,5 +80,32 @@ public class VoucherServiceImpl implements VoucherService {
         voucher.setMaximumDiscountAmount(maximumDiscountAmount);
 
         voucherRepository.save(voucher);
+    }
+
+    public void useVoucher(Long voucherId, Long paymentId) {
+        Voucher voucher = findVoucherById(voucherId);
+        Payment currentPayment = paymentRepository.findById(paymentId).get();
+
+        if (voucher.getHasUsageLimit() && voucher.getUsageLimit() <= 0) {
+            throw new IllegalArgumentException("Voucher is no longer available");
+        }
+
+        int paymentPrice = (int) currentPayment.getTotalPrice();
+        boolean voucherMinimumOrderMet = paymentPrice >= voucher.getMinimumOrder();
+        if (!voucherMinimumOrderMet) {
+            throw new IllegalArgumentException("Voucher minimum order is not met");
+        }
+
+        int discountAmount = voucher.getDiscountPercentage() * paymentPrice;
+        int discountedPrice = paymentPrice - discountAmount;
+        if (discountAmount > voucher.getMaximumDiscountAmount())
+            discountedPrice = paymentPrice - voucher.getMaximumDiscountAmount();
+
+        currentPayment.setTotalPrice(discountedPrice);
+
+        paymentRepository.save(currentPayment);
+
+        if (voucher.getHasUsageLimit())
+            voucher.decrementUsageLimit();
     }
 }
