@@ -1,15 +1,15 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
-import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
-import id.ac.ui.cs.advprog.youkosoproduct.dto.DefaultResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.dto.UseVoucherRequest;
-import id.ac.ui.cs.advprog.youkosoproduct.dto.VoucherListRequest;
-import id.ac.ui.cs.advprog.youkosoproduct.model.Payment;
+import id.ac.ui.cs.advprog.youkosoproduct.dto.VoucherListResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
-import id.ac.ui.cs.advprog.youkosoproduct.model.builder.DefaultResponseBuilder;
-import id.ac.ui.cs.advprog.youkosoproduct.repository.PaymentRepository;
-import id.ac.ui.cs.advprog.youkosoproduct.service.AuthService;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthResponse;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthService;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.DefaultResponse;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.DefaultResponseBuilder;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.DefaultResponseWithData;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.DefaultResponseWithDataBuilder;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,8 +37,9 @@ public class VoucherController {
     private static final Logger logger = LoggerFactory.getLogger(VoucherController.class);
 
     @Async
-    @PutMapping("/use/{voucherId}")
+    @PutMapping("list/{paymentId}")
     public CompletableFuture<ResponseEntity<?>> useVoucher(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @PathVariable("paymentId") Long paymentId,
             @RequestBody UseVoucherRequest useVoucherRequest) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -48,49 +49,61 @@ public class VoucherController {
                 }
 
                 Long voucherId = useVoucherRequest.getVoucherId();
-                Long paymentId = useVoucherRequest.getPaymentId();
+                // String userId = authResponse.getUser().getId();
+                // voucherService.useVoucher(voucherId, paymentId, userId);
                 voucherService.useVoucher(voucherId, paymentId);
 
-                DefaultResponse<String> response = new DefaultResponseBuilder<String>()
+                DefaultResponse response = new DefaultResponseBuilder()
                         .statusCode(HttpStatus.OK.value())
                         .message("Success")
                         .success(true)
-                        .data("Voucher used successfully")
                         .build();
                 return ResponseEntity.ok(response);
             } catch (Exception e) {
-                return ResponseEntity.badRequest().body("Failed to use voucher: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to use voucher: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }
 
     @Async
-    @GetMapping("/list")
+    @GetMapping("/list/{paymentId}")
     public CompletableFuture<ResponseEntity<?>> voucherListPage(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody VoucherListRequest voucherListRequest) {
+            @PathVariable("paymentId") Long paymentId) {
         return CompletableFuture.supplyAsync(() -> {
+            
+            AuthResponse authResponse = authService.validateToken(authHeader).join();
+            if (authResponse == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            
             try {
-                AuthResponse authResponse = authService.validateToken(authHeader).join();
-                if (authResponse == null) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                }
-
-                if (voucherListRequest.getPaymentId() == null) {
+                List<Voucher> allVouchers = voucherService.findAll();
+                if (paymentId == null) {
                     throw new BadRequestException("Invalid request");
                 }
-
-                List<Voucher> allVouchers = voucherService.findAll();
-                DefaultResponse<List<Voucher>> response = new DefaultResponseBuilder<List<Voucher>>()
-                        .statusCode(HttpStatus.OK.value())
-                        .message("Success")
-                        .success(true)
-                        .data(allVouchers)
-                        .build();
+                
+                VoucherListResponse response = new VoucherListResponse();
+                response.setStatusCode(HttpStatus.OK.value());
+                response.setMessage("Success");
+                response.setSuccess(true);
+                response.setVoucherData(allVouchers);
+                response.setPaymentId(paymentId);
                 return ResponseEntity.ok(response);
+
             } catch (Exception e) {
                 logger.error("Error in retrieving vouchers information!", e);
-                return ResponseEntity.badRequest().body("Failed to retrieve vouchers information: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to retrieve vouchers information: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }
@@ -107,10 +120,22 @@ public class VoucherController {
                 }
 
                 voucherService.create(voucher);
-                return ResponseEntity.ok().build();
+                Voucher createdVoucher = voucherService.findVoucherById(voucher.getId());
+                DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data(createdVoucher)
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 logger.error("Error in creating voucher!", e);
-                return ResponseEntity.badRequest().body("Failed to create voucher: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to create voucher: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }
@@ -127,10 +152,21 @@ public class VoucherController {
                 }
 
                 Voucher obtainedVoucher = voucherService.findVoucherById(id);
-                return ResponseEntity.ok(obtainedVoucher);
+                DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data(obtainedVoucher)
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 logger.error("Error in find voucher by id!", e);
-                return ResponseEntity.badRequest().body("Failed to find voucher by id: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to find voucher by id: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }
@@ -141,10 +177,21 @@ public class VoucherController {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 List<Voucher> allVouchers = voucherService.findAll();
-                return ResponseEntity.ok(allVouchers);
+                DefaultResponseWithData<List<Voucher>> response = new DefaultResponseWithDataBuilder<List<Voucher>>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data(allVouchers)
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 logger.error("Error in find all vouchers!", e);
-                return ResponseEntity.badRequest().body("Failed to find all vouchers: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to find all vouchers: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }
@@ -166,10 +213,23 @@ public class VoucherController {
                         id, voucher.getName(), voucher.getDiscountPercentage(),
                         voucher.getHasUsageLimit(), voucher.getUsageLimit(),
                         voucher.getMinimumOrder(), voucher.getMaximumDiscountAmount());
-                return ResponseEntity.ok().build();
+                Voucher editedVoucher = voucherService.findVoucherById(voucher.getId());
+
+                DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data(editedVoucher)
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 logger.error("Error in update voucher!", e);
-                return ResponseEntity.badRequest().body("Failed to update voucher: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to update voucher: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }
@@ -185,11 +245,23 @@ public class VoucherController {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
 
+                Voucher deletedVoucher = voucherService.findVoucherById(id);
                 voucherService.delete(id);
-                return ResponseEntity.ok().build();
+                DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Success")
+                        .success(true)
+                        .data(deletedVoucher)
+                        .build();
+                return ResponseEntity.ok(response);
             } catch (Exception e) {
                 logger.error("Error in delete voucher!", e);
-                return ResponseEntity.badRequest().body("Failed to delete voucher: " + e.getMessage());
+                DefaultResponse response = new DefaultResponseBuilder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
+                        .message("Failed to delete voucher: " + e.getMessage())
+                        .success(false)
+                        .build();
+                return ResponseEntity.badRequest().body(response);
             }
         });
     }

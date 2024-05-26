@@ -1,7 +1,7 @@
-package id.ac.ui.cs.advprog.youkosoproduct.service;
+package id.ac.ui.cs.advprog.youkosoproduct.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
+
 import id.ac.ui.cs.advprog.youkosoproduct.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

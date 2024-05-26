@@ -2,11 +2,12 @@ package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import id.ac.ui.cs.advprog.youkosoproduct.dto.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
-import id.ac.ui.cs.advprog.youkosoproduct.model.builder.VoucherBuilder;
-import id.ac.ui.cs.advprog.youkosoproduct.service.AuthService;
+import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthResponse;
+import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -87,6 +88,7 @@ public class VoucherControllerTest {
                 .andExpect(status().isOk());
 
         verify(voucherService, times(1)).create(any(Voucher.class));
+        verify(voucherService, times(1)).findVoucherById(1L);
         verifyNoMoreInteractions(voucherService);
     }
 
@@ -105,7 +107,7 @@ public class VoucherControllerTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Failed to create voucher: Invalid voucher attribute"));
+                .andExpect(jsonPath("message").value("Failed to create voucher: Invalid voucher attribute"));
 
         verify(voucherService, times(1)).create(any(Voucher.class));
         verifyNoMoreInteractions(voucherService);
@@ -124,13 +126,13 @@ public class VoucherControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Voucher 1"))
-                .andExpect(jsonPath("$.discountPercentage").value(50))
-                .andExpect(jsonPath("$.hasUsageLimit").value(true))
-                .andExpect(jsonPath("$.usageLimit").value(100))
-                .andExpect(jsonPath("$.minimumOrder").value(50000))
-                .andExpect(jsonPath("$.maximumDiscountAmount").value(25000));
+                .andExpect(jsonPath("data.id").value(1L))
+                .andExpect(jsonPath("data.name").value("Voucher 1"))
+                .andExpect(jsonPath("data.discountPercentage").value(50))
+                .andExpect(jsonPath("data.hasUsageLimit").value(true))
+                .andExpect(jsonPath("data.usageLimit").value(100))
+                .andExpect(jsonPath("data.minimumOrder").value(50000))
+                .andExpect(jsonPath("data.maximumDiscountAmount").value(25000));
 
         verify(voucherService, times(1)).findVoucherById(1L);
         verifyNoMoreInteractions(voucherService);
@@ -149,7 +151,7 @@ public class VoucherControllerTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Failed to find voucher by id: There is no voucher with ID 2"));
+                .andExpect(jsonPath("message").value("Failed to find voucher by id: There is no voucher with ID 2"));
 
         verify(voucherService, times(1)).findVoucherById(2L);
         verifyNoMoreInteractions(voucherService);
@@ -168,15 +170,16 @@ public class VoucherControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(2L))
-                .andExpect(jsonPath("$.name").value("Voucher 2"))
-                .andExpect(jsonPath("$.discountPercentage").value(20))
-                .andExpect(jsonPath("$.hasUsageLimit").value(false))
-                .andExpect(jsonPath("$.usageLimit").value(Integer.MAX_VALUE))
-                .andExpect(jsonPath("$.minimumOrder").value(0))
-                .andExpect(jsonPath("$.maximumDiscountAmount").value(Integer.MAX_VALUE));
+                .andExpect(jsonPath("data.id").value(2L))
+                .andExpect(jsonPath("data.name").value("Voucher 2"))
+                .andExpect(jsonPath("data.discountPercentage").value(20))
+                .andExpect(jsonPath("data.hasUsageLimit").value(false))
+                .andExpect(jsonPath("data.usageLimit").value(Integer.MAX_VALUE))
+                .andExpect(jsonPath("data.minimumOrder").value(0))
+                .andExpect(jsonPath("data.maximumDiscountAmount").value(Integer.MAX_VALUE));
 
         verify(voucherService, times(1)).findVoucherById(2L);
+
         verifyNoMoreInteractions(voucherService);
     }
 
@@ -197,20 +200,20 @@ public class VoucherControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Voucher 1"))
-                .andExpect(jsonPath("$[0].discountPercentage").value(50))
-                .andExpect(jsonPath("$[0].hasUsageLimit").value(true))
-                .andExpect(jsonPath("$[0].usageLimit").value(100))
-                .andExpect(jsonPath("$[0].minimumOrder").value(50000))
-                .andExpect(jsonPath("$[0].maximumDiscountAmount").value(25000))
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].name").value("Voucher 2"))
-                .andExpect(jsonPath("$[1].discountPercentage").value(20))
-                .andExpect(jsonPath("$[1].hasUsageLimit").value(false))
-                .andExpect(jsonPath("$[1].usageLimit").value(Integer.MAX_VALUE))
-                .andExpect(jsonPath("$[1].minimumOrder").value(0))
-                .andExpect(jsonPath("$[1].maximumDiscountAmount").value(Integer.MAX_VALUE));
+                .andExpect(jsonPath("data[0].id").value(1))
+                .andExpect(jsonPath("data[0].name").value("Voucher 1"))
+                .andExpect(jsonPath("data[0].discountPercentage").value(50))
+                .andExpect(jsonPath("data[0].hasUsageLimit").value(true))
+                .andExpect(jsonPath("data[0].usageLimit").value(100))
+                .andExpect(jsonPath("data[0].minimumOrder").value(50000))
+                .andExpect(jsonPath("data[0].maximumDiscountAmount").value(25000))
+                .andExpect(jsonPath("data[1].id").value(2))
+                .andExpect(jsonPath("data[1].name").value("Voucher 2"))
+                .andExpect(jsonPath("data[1].discountPercentage").value(20))
+                .andExpect(jsonPath("data[1].hasUsageLimit").value(false))
+                .andExpect(jsonPath("data[1].usageLimit").value(Integer.MAX_VALUE))
+                .andExpect(jsonPath("data[1].minimumOrder").value(0))
+                .andExpect(jsonPath("data[1].maximumDiscountAmount").value(Integer.MAX_VALUE));
     
         verify(voucherService, times(1)).findAll();
         verifyNoMoreInteractions(voucherService);
@@ -247,7 +250,7 @@ public class VoucherControllerTest {
     
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Failed to find all vouchers: Error retrieving vouchers"));
+                .andExpect(jsonPath("message").value("Failed to find all vouchers: Error retrieving vouchers"));
     
         verify(voucherService, times(1)).findAll();
         verifyNoMoreInteractions(voucherService);
@@ -265,7 +268,7 @@ public class VoucherControllerTest {
                 .minimumOrder(75)
                 .maximumDiscountAmount(150)
                 .build();
-        updatedVoucher.setId(3L);
+        updatedVoucher.setId(1L);
     
         MvcResult mvcResult = mockMvc.perform(put("/voucher/api/edit/{voucherId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -285,7 +288,9 @@ public class VoucherControllerTest {
                 eq(150),
                 eq(75),
                 eq(150));
-    
+
+        verify(voucherService, times(1)).findVoucherById(1L);
+
         verifyNoMoreInteractions(voucherService);
     }
     
@@ -322,7 +327,7 @@ public class VoucherControllerTest {
     
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Failed to update voucher: There is no voucher with ID 3"));
+                .andExpect(jsonPath("message").value("Failed to update voucher: There is no voucher with ID 3"));
     
         verify(voucherService, times(1)).edit(
                 eq(3L),
@@ -349,6 +354,7 @@ public class VoucherControllerTest {
                 .andExpect(status().isOk());
     
         verify(voucherService, times(1)).delete(1L);
+        verify(voucherService, times(1)).findVoucherById(1L);
         verifyNoMoreInteractions(voucherService);
     }
     
@@ -365,8 +371,9 @@ public class VoucherControllerTest {
     
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Failed to delete voucher: There is no voucher with ID 3"));
+                .andExpect(jsonPath("message").value("Failed to delete voucher: There is no voucher with ID 3"));
     
+        verify(voucherService, times(1)).findVoucherById(3L);
         verify(voucherService, times(1)).delete(3L);
         verifyNoMoreInteractions(voucherService);
     }

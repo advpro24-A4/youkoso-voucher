@@ -1,39 +1,38 @@
-package id.ac.ui.cs.advprog.youkosoproduct.model.builder;
+package id.ac.ui.cs.advprog.youkosoproduct.utils;
 
-import id.ac.ui.cs.advprog.youkosoproduct.dto.DefaultResponse;
-
-public class DefaultResponseBuilder<T> {
+public class DefaultResponseWithDataBuilder<T> {
     private int statusCode;
     private String message;
     private boolean success;
     private T data;
 
-    public DefaultResponseBuilder<T> statusCode(int statusCode) {
+    public DefaultResponseWithDataBuilder<T> statusCode(int statusCode) {
         this.statusCode = statusCode;
         return this;
     }
 
-    public DefaultResponseBuilder<T> message(String message) {
+    public DefaultResponseWithDataBuilder<T> message(String message) {
         this.message = message;
         return this;
     }
 
-    public DefaultResponseBuilder<T> success(boolean success) {
+    public DefaultResponseWithDataBuilder<T> success(boolean success) {
         this.success = success;
         return this;
     }
 
-    public DefaultResponseBuilder<T> data(T data) {
+    public DefaultResponseWithDataBuilder<T> data(T data) {
         this.data = data;
         return this;
     }
 
-    public DefaultResponse<T> build() {
-        DefaultResponse<T> response = new DefaultResponse<>();
+    public DefaultResponseWithData<T> build() {
+        DefaultResponseWithData<T> response = new DefaultResponseWithData<>();
         response.setStatusCode(this.statusCode);
         response.setMessage(this.message);
         response.setSuccess(this.success);
         response.setData(this.data);
+
         return response;
     }
 }

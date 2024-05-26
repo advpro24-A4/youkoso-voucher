@@ -82,6 +82,37 @@ public class VoucherServiceImpl implements VoucherService {
         voucherRepository.save(voucher);
     }
 
+    // public void useVoucher(Long voucherId, Long paymentId, String userId) {
+    //     Voucher voucher = findVoucherById(voucherId);
+    //     Payment currentPayment = paymentRepository.findById(paymentId).get();
+
+    //     if (!userId.equals(currentPayment.getUserId())) {
+    //         throw new IllegalArgumentException("There's no such payment");
+    //     }
+
+    //     if (voucher.getHasUsageLimit() && voucher.getUsageLimit() <= 0) {
+    //         throw new IllegalArgumentException("Voucher is no longer available");
+    //     }
+
+    //     int paymentPrice = (int) currentPayment.getTotalPrice();
+    //     boolean voucherMinimumOrderMet = paymentPrice >= voucher.getMinimumOrder();
+    //     if (!voucherMinimumOrderMet) {
+    //         throw new IllegalArgumentException("Voucher minimum order is not met");
+    //     }
+
+    //     int discountAmount = voucher.getDiscountPercentage() * paymentPrice;
+    //     int discountedPrice = paymentPrice - discountAmount;
+    //     if (discountAmount > voucher.getMaximumDiscountAmount())
+    //         discountedPrice = paymentPrice - voucher.getMaximumDiscountAmount();
+
+    //     currentPayment.setTotalPrice(discountedPrice);
+
+    //     paymentRepository.save(currentPayment);
+
+    //     if (voucher.getHasUsageLimit())
+    //         voucher.decrementUsageLimit();
+    // }
+
     public void useVoucher(Long voucherId, Long paymentId) {
         Voucher voucher = findVoucherById(voucherId);
         Payment currentPayment = paymentRepository.findById(paymentId).get();

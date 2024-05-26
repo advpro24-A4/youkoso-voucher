@@ -1,6 +1,4 @@
-package id.ac.ui.cs.advprog.youkosoproduct.model.builder;
-
-import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+package id.ac.ui.cs.advprog.youkosoproduct.model;
 
 public class VoucherBuilder {
     private String name;

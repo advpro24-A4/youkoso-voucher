@@ -1,4 +1,4 @@
-package id.ac.ui.cs.advprog.youkosoproduct.dto;
+package id.ac.ui.cs.advprog.youkosoproduct.utils;
 
 import id.ac.ui.cs.advprog.youkosoproduct.model.User;
 import lombok.Getter;
