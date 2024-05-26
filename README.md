@@ -24,6 +24,9 @@ Stack:
 How to init:
 - Make sure insert database url on `application.properties`
 
+Test Coverage:
+![alt text](images/image.png)
+
 Monitoring:
 ![alt text](<images/image-1.png>)   
 ![alt text](<images/image-2.png>)
