@@ -16,7 +16,7 @@ java {
 
 sonar {
 	properties {
-		property("sonar.projectKey", "advpro24-A4_youkoso-product")
+		property("sonar.projectKey", "advpro24-A4_youkoso-voucher")
 		property("sonar.organization", "advpro24-a4")
 		property("sonar.host.url", "https://sonarcloud.io")
 	}
@@ -85,6 +85,14 @@ tasks.jacocoTestReport {
        fileTree(it) { 
 			exclude("**/*Application**")
 			exclude("**/*Config**")
+			exclude("**/*Payment**")
+			exclude("**/*Auth**")
+			exclude("**/*Exception**")
+			exclude("**/*Profile**")
+			exclude("**/*User**")
+			exclude("**/*Security**")
+			exclude("**/*Response**")
+			exclude("**/*Request**")
 		}
    	}))
 	dependsOn(tasks.test)
