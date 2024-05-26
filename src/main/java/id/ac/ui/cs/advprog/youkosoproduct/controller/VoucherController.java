@@ -1,8 +1,9 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
-import id.ac.ui.cs.advprog.youkosoproduct.dto.UseVoucherRequest;
 import id.ac.ui.cs.advprog.youkosoproduct.dto.VoucherListResponse;
+import id.ac.ui.cs.advprog.youkosoproduct.model.Payment;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
+import id.ac.ui.cs.advprog.youkosoproduct.repository.PaymentRepository;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthService;
@@ -32,15 +33,19 @@ public class VoucherController {
     private VoucherService voucherService;
 
     @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
     private AuthService authService;
 
     private static final Logger logger = LoggerFactory.getLogger(VoucherController.class);
+    private final String SUCCESS = "Success";
 
     @Async
-    @PutMapping("list/{paymentId}")
+    @PutMapping("list/{paymentId}/{voucherId}")
     public CompletableFuture<ResponseEntity<?>> useVoucher(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @PathVariable("paymentId") Long paymentId,
-            @RequestBody UseVoucherRequest useVoucherRequest) {
+            @PathVariable("voucherId") Long voucherId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 AuthResponse authResponse = authService.validateToken(authHeader).join();
@@ -48,14 +53,12 @@ public class VoucherController {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
 
-                Long voucherId = useVoucherRequest.getVoucherId();
-                // String userId = authResponse.getUser().getId();
-                // voucherService.useVoucher(voucherId, paymentId, userId);
-                voucherService.useVoucher(voucherId, paymentId);
+                String userId = authResponse.getUser().getId();
+                voucherService.useVoucher(voucherId, paymentId, userId);
 
                 DefaultResponse response = new DefaultResponseBuilder()
                         .statusCode(HttpStatus.OK.value())
-                        .message("Success")
+                        .message(SUCCESS)
                         .success(true)
                         .build();
                 return ResponseEntity.ok(response);
@@ -90,7 +93,7 @@ public class VoucherController {
                 
                 VoucherListResponse response = new VoucherListResponse();
                 response.setStatusCode(HttpStatus.OK.value());
-                response.setMessage("Success");
+                response.setMessage(SUCCESS);
                 response.setSuccess(true);
                 response.setVoucherData(allVouchers);
                 response.setPaymentId(paymentId);
@@ -123,7 +126,7 @@ public class VoucherController {
                 Voucher createdVoucher = voucherService.findVoucherById(voucher.getId());
                 DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
                         .statusCode(HttpStatus.OK.value())
-                        .message("Success")
+                        .message(SUCCESS)
                         .success(true)
                         .data(createdVoucher)
                         .build();
@@ -154,7 +157,7 @@ public class VoucherController {
                 Voucher obtainedVoucher = voucherService.findVoucherById(id);
                 DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
                         .statusCode(HttpStatus.OK.value())
-                        .message("Success")
+                        .message(SUCCESS)
                         .success(true)
                         .data(obtainedVoucher)
                         .build();
@@ -177,13 +180,7 @@ public class VoucherController {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 List<Voucher> allVouchers = voucherService.findAll();
-                DefaultResponseWithData<List<Voucher>> response = new DefaultResponseWithDataBuilder<List<Voucher>>()
-                        .statusCode(HttpStatus.OK.value())
-                        .message("Success")
-                        .success(true)
-                        .data(allVouchers)
-                        .build();
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(allVouchers);
             } catch (Exception e) {
                 logger.error("Error in find all vouchers!", e);
                 DefaultResponse response = new DefaultResponseBuilder()
@@ -217,7 +214,7 @@ public class VoucherController {
 
                 DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
                         .statusCode(HttpStatus.OK.value())
-                        .message("Success")
+                        .message(SUCCESS)
                         .success(true)
                         .data(editedVoucher)
                         .build();
@@ -249,7 +246,7 @@ public class VoucherController {
                 voucherService.delete(id);
                 DefaultResponseWithData<Voucher> response = new DefaultResponseWithDataBuilder<Voucher>()
                         .statusCode(HttpStatus.OK.value())
-                        .message("Success")
+                        .message(SUCCESS)
                         .success(true)
                         .data(deletedVoucher)
                         .build();
