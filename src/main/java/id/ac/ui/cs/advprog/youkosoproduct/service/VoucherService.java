@@ -16,7 +16,5 @@ public interface VoucherService {
     void edit(Long id, String name, int discountPercentage, boolean hasUsageLimit,
             int usageLimit, int minimumOrder, int maximumDiscountAmount);
 
-    // void useVoucher(Long voucherId, Long paymentId, String userId);
-
-    void useVoucher(Long voucherId, Long paymentId);
+    void useVoucher(Long voucherId, Long paymentId, String userId);
 }
