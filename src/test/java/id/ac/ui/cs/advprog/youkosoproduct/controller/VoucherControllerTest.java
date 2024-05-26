@@ -197,23 +197,23 @@ public class VoucherControllerTest {
                 .andExpect(request().asyncStarted())
                 .andReturn();
     
-        mockMvc.perform(asyncDispatch(mvcResult))
+                mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("data[0].id").value(1))
-                .andExpect(jsonPath("data[0].name").value("Voucher 1"))
-                .andExpect(jsonPath("data[0].discountPercentage").value(50))
-                .andExpect(jsonPath("data[0].hasUsageLimit").value(true))
-                .andExpect(jsonPath("data[0].usageLimit").value(100))
-                .andExpect(jsonPath("data[0].minimumOrder").value(50000))
-                .andExpect(jsonPath("data[0].maximumDiscountAmount").value(25000))
-                .andExpect(jsonPath("data[1].id").value(2))
-                .andExpect(jsonPath("data[1].name").value("Voucher 2"))
-                .andExpect(jsonPath("data[1].discountPercentage").value(20))
-                .andExpect(jsonPath("data[1].hasUsageLimit").value(false))
-                .andExpect(jsonPath("data[1].usageLimit").value(Integer.MAX_VALUE))
-                .andExpect(jsonPath("data[1].minimumOrder").value(0))
-                .andExpect(jsonPath("data[1].maximumDiscountAmount").value(Integer.MAX_VALUE));
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Voucher 1"))
+                .andExpect(jsonPath("$[0].discountPercentage").value(50))
+                .andExpect(jsonPath("$[0].hasUsageLimit").value(true))
+                .andExpect(jsonPath("$[0].usageLimit").value(100))
+                .andExpect(jsonPath("$[0].minimumOrder").value(50000))
+                .andExpect(jsonPath("$[0].maximumDiscountAmount").value(25000))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].name").value("Voucher 2"))
+                .andExpect(jsonPath("$[1].discountPercentage").value(20))
+                .andExpect(jsonPath("$[1].hasUsageLimit").value(false))
+                .andExpect(jsonPath("$[1].usageLimit").value(Integer.MAX_VALUE))
+                .andExpect(jsonPath("$[1].minimumOrder").value(0))
+                .andExpect(jsonPath("$[1].maximumDiscountAmount").value(Integer.MAX_VALUE));
     
         verify(voucherService, times(1)).findAll();
         verifyNoMoreInteractions(voucherService);
