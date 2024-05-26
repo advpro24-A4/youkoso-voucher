@@ -45,16 +45,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.flywaydb:flyway-core")
-	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate6")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
-	implementation("org.springframework.boot:spring-boot-starter-actuator:3.2.5")
-	runtimeOnly("io.micrometer:micrometer-registry-prometheus:1.12.5")
-	implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate6:2.15.2")
+	compileOnly("org.projectlombok:lombok")
+	runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 buildscript {
@@ -83,7 +83,6 @@ tasks.test {
 tasks.jacocoTestReport {
 	classDirectories.setFrom(files(classDirectories.files.map {
        fileTree(it) { 
-			exclude("**/*Application**")
 			exclude("**/*Config**")
 			exclude("**/*Payment**")
 			exclude("**/*Auth**")

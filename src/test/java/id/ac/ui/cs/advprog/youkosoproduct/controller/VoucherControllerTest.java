@@ -1,13 +1,11 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
 import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,24 +16,23 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.util.concurrent.CompletableFuture;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class VoucherControllerTest {
 
     private MockMvc mockMvc;
     private Voucher voucher;
     private Voucher voucherWithDefault;
+    private ObjectMapper objectMapper;
     private CompletableFuture<AuthResponse> futureAuthResponse;
 
     @Mock
@@ -70,6 +67,8 @@ public class VoucherControllerTest {
                 .hasUsageLimit(false)
                 .build();
         this.voucherWithDefault.setId(2L);
+
+        objectMapper = new ObjectMapper();
     }
 
     @Test
@@ -376,6 +375,42 @@ public class VoucherControllerTest {
         verify(voucherService, times(1)).findVoucherById(3L);
         verify(voucherService, times(1)).delete(3L);
         verifyNoMoreInteractions(voucherService);
+    }
+
+    @Test
+    public void testCreateVoucherUnauthorized() throws Exception {
+        when(authService.validateToken(any(String.class))).thenReturn(CompletableFuture.completedFuture(null));
+
+        mockMvc.perform(post("/voucher/api/create")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    public void testUseVoucherHappyPath() throws Exception {
+        AuthResponse authResponse = new AuthResponse();
+
+        when(authService.validateToken(any(String.class))).thenReturn(CompletableFuture.completedFuture(authResponse));
+
+        mockMvc.perform(put("/voucher/list/1/2")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testVoucherListPageHappyPath() throws Exception {
+        List<Voucher> vouchers = new ArrayList<>();
+        vouchers.add(new Voucher());
+        vouchers.add(new Voucher());
+
+        AuthResponse authResponse = new AuthResponse();
+
+        when(authService.validateToken(any(String.class))).thenReturn(CompletableFuture.completedFuture(authResponse));
+        when(voucherService.findAll()).thenReturn(vouchers);
+
+        mockMvc.perform(get("/voucher/list/1")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
+                .andExpect(status().isOk());
     }
     
     private String asJsonString(Object object) {

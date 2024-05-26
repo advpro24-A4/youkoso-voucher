@@ -1,7 +1,9 @@
 package id.ac.ui.cs.advprog.youkosoproduct.service;
 
+import id.ac.ui.cs.advprog.youkosoproduct.model.Payment;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
 import id.ac.ui.cs.advprog.youkosoproduct.model.VoucherBuilder;
+import id.ac.ui.cs.advprog.youkosoproduct.repository.PaymentRepository;
 import id.ac.ui.cs.advprog.youkosoproduct.repository.VoucherRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +31,9 @@ public class VoucherServiceImplTest {
 
     @Mock
     private VoucherRepository voucherRepository;
+
+    @Mock
+    private PaymentRepository paymentRepository;
 
     private Voucher voucher;
 
@@ -219,5 +224,132 @@ public class VoucherServiceImplTest {
         });
 
         verify(voucherRepository, times(0)).save(voucher);
+    }
+
+        @Test
+    public void testUseVoucherHappyPath() {
+        Long voucherId = 1L;
+        Long paymentId = 1L;
+        String userId = "user1";
+
+        Voucher voucher = new Voucher();
+        voucher.setId(voucherId);
+        voucher.setDiscountPercentage(10);
+        voucher.setHasUsageLimit(true);
+        voucher.setUsageLimit(5);
+        voucher.setMinimumOrder(100);
+        voucher.setMaximumDiscountAmount(50);
+
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        payment.setUserId(userId);
+        payment.setTotalPrice(200);
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+
+        service.useVoucher(voucherId, paymentId, userId);
+
+        // Assertions
+        // You can assert the updated values of the voucher and payment objects
+    }
+
+    @Test
+    public void testUseVoucherInvalidVoucherId() {
+        Long voucherId = 1L;
+        Long paymentId = 1L;
+        String userId = "user1";
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.useVoucher(voucherId, paymentId, userId);
+        });
+    }
+
+    @Test
+    public void testUseVoucherInvalidPaymentId() {
+        Long voucherId = 1L;
+        Long paymentId = 1L;
+        String userId = "user1";
+
+        Voucher voucher = new Voucher();
+        voucher.setId(voucherId);
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.useVoucher(voucherId, paymentId, userId);
+        });
+    }
+
+    @Test
+    public void testUseVoucherInvalidUserId() {
+        Long voucherId = 1L;
+        Long paymentId = 1L;
+        String userId = "user1";
+        String differentUserId = "user2";
+
+        Voucher voucher = new Voucher();
+        voucher.setId(voucherId);
+
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        payment.setUserId(differentUserId);
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.useVoucher(voucherId, paymentId, userId);
+        });
+    }
+
+    @Test
+    public void testUseVoucherVoucherNotAvailable() {
+        Long voucherId = 1L;
+        Long paymentId = 1L;
+        String userId = "user1";
+
+        Voucher voucher = new Voucher();
+        voucher.setId(voucherId);
+        voucher.setHasUsageLimit(true);
+        voucher.setUsageLimit(0);
+
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        payment.setUserId(userId);
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.useVoucher(voucherId, paymentId, userId);
+        });
+    }
+
+    @Test
+    public void testUseVoucherMinimumOrderNotMet() {
+        Long voucherId = 1L;
+        Long paymentId = 1L;
+        String userId = "user1";
+
+        Voucher voucher = new Voucher();
+        voucher.setId(voucherId);
+        voucher.setHasUsageLimit(true);
+        voucher.setMinimumOrder(1000);
+
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        payment.setUserId(userId);
+        payment.setTotalPrice(500);
+
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.of(voucher));
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.useVoucher(voucherId, paymentId, userId);
+        });
     }
 }
