@@ -45,16 +45,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.flywaydb:flyway-core")
-	implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate6")
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate6:2.15.2")
+	implementation("org.springframework.boot:spring-boot-starter-actuator:3.2.5")
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	compileOnly("org.projectlombok:lombok")
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus:1.12.5")
+	runtimeOnly("org.postgresql:postgresql")
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
-	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("org.postgresql:postgresql")
-	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 buildscript {
