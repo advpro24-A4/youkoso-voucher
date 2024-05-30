@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.youkosoproduct.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "payments")
+@Generated
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

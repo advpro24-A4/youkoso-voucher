@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import lombok.Generated;
 
 @Service
+@Generated
 public class AuthService {
     @Value("${auth.url}")
     private String authUrl;

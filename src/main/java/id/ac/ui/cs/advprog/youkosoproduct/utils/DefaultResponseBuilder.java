@@ -1,5 +1,8 @@
 package id.ac.ui.cs.advprog.youkosoproduct.utils;
 
+import lombok.Generated;
+
+@Generated
 public class DefaultResponseBuilder {
     private int statusCode;
     private String message;

@@ -32,7 +32,6 @@ public class VoucherControllerTest {
     private MockMvc mockMvc;
     private Voucher voucher;
     private Voucher voucherWithDefault;
-    private ObjectMapper objectMapper;
     private CompletableFuture<AuthResponse> futureAuthResponse;
 
     @Mock
@@ -67,8 +66,6 @@ public class VoucherControllerTest {
                 .hasUsageLimit(false)
                 .build();
         this.voucherWithDefault.setId(2L);
-
-        objectMapper = new ObjectMapper();
     }
 
     @Test

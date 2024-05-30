@@ -1,9 +1,7 @@
 package id.ac.ui.cs.advprog.youkosoproduct.controller;
 
 import id.ac.ui.cs.advprog.youkosoproduct.dto.VoucherListResponse;
-import id.ac.ui.cs.advprog.youkosoproduct.model.Payment;
 import id.ac.ui.cs.advprog.youkosoproduct.model.Voucher;
-import id.ac.ui.cs.advprog.youkosoproduct.repository.PaymentRepository;
 import id.ac.ui.cs.advprog.youkosoproduct.service.VoucherService;
 import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthResponse;
 import id.ac.ui.cs.advprog.youkosoproduct.utils.AuthService;
@@ -31,9 +29,6 @@ public class VoucherController {
 
     @Autowired
     private VoucherService voucherService;
-
-    @Autowired
-    private PaymentRepository paymentRepository;
 
     @Autowired
     private AuthService authService;

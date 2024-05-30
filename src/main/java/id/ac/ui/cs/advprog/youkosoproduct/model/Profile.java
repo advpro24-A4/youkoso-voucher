@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.youkosoproduct.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Generated
 public class Profile {
     private String name;
     private String username;
